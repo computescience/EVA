@@ -8,7 +8,8 @@
         <file>icons/paste.png</file>
         <file>icons/save.png</file>
         <file>icons/saveas.png</file>
-        <file>icons/question-mark.png</file> <!--Produced by Daniel Bruce via www.flaticon.com, licenced under CC-BY></!-->
-        <file>icons/full.png</file> <!--Produced by Chris Veigt via www.flaticon.com, licenced under CC-BY></!-->
+        <file>icons/question-mark.png</file>
+        <file>icons/full.png</file>
+        <file>icons/RCCircuit.png</file>
     </qresource>
 </RCC>

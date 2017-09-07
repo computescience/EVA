@@ -1,60 +1,17 @@
+/*
 #include "circuittree.h"
 #include <cstdio>
 
 typedef std::list<CircuitNode*>::iterator listIndex;
-CirElem::CirElem(CirElemType ceType):
-elem_type_ (ceType)
-{
-    int parSize;
-    
-    switch (ceType){
-    case NULL_Elem: 
-        parSize=0; break;
-    case R: case C: case L: case W:
-        parSize=1; break;
-    case Q: case FLWs: case FLWo:
-        parSize=2; break;
-    case dL:
-        parSize=4;break;
-    }
-    
-    ParValList.resize(parSize);
-    dV.resize(parSize);
-    dV2.resize(parSize);
-    
-    switch (ceType) { 
-    //Initialize the parameters for different types of circuit lements
-    case NULL_Elem: break;
-    case R:
-        ParValList[0] = DEFAULT_R; break;
-    case C:
-        ParValList[0] = DEFAULT_C; break;
-    case L:
-        ParValList[0] = DEFAULT_L; break;
-    case W:
-        ParValList[0] = DEFAULT_W; break;
-    case Q:
-        ParValList[0] = DEFAULT_Q; break;
-        ParValList[1] = DEFAULT_QN; break;
-    case FLWs: case FLWo:
-        ParValList[0] = DEFAULT_Wr; break;
-        ParValList[1] = DEFAULT_Wt; break;
-    case dL:
-        ParValList[0] = DEFAULT_dLR1; break;
-        ParValList[1] = DEFAULT_dLR2; break;
-        ParValList[2] = DEFAULT_dLQ;  break;
-        ParValList[3] = DEFAULT_dLQN; break;
-    }
-}
 
 CircuitTree::CircuitTree(){
-	countNodeID = 0;
+    countNodeID = 0;
 }
 
-void CircuitTree::changeElement(CircuitNode *Node, CirElem::CirElemType newElemType)
+void CircuitTree::changeElement(CircuitNode *Node, CircuitElement::CirElemType newElemType)
 {
     if (Node==NULL || Node->Type!=CircuitNode::Element) return;
-    Node->nodeElement = CirElem(newElemType);
+    Node->nodeElement = CircuitElement(newElemType);
 }
 
 void CircuitTree::clear(){
@@ -72,7 +29,7 @@ listIndex CircuitNode::findChild(CircuitNode *Child){
 
 CircuitNode* CircuitTree::addSerial(CircuitNode *Node, 
                                    bool Before,
-                                   CirElem::CirElemType Type){
+                                   CircuitElement::CirElemType Type){
 
     CircuitNode* newNode = new CircuitNode(countNodeID++, CircuitNode::Element,NULL, Type);
     elementList.push_back(newNode);
@@ -87,7 +44,7 @@ CircuitNode* CircuitTree::addSerial(CircuitNode *Node,
      *  1. Create parallel / serial nodes as necessary
      *  2. Fix parent's children list
      *  3. Fix Node's dependence
-     *  4. Fix newNode's dependence **/
+     *  4. Fix newNode's dependence 
     switch (Node->Type) {
     default: break;
     case CircuitNode::Serial:
@@ -132,7 +89,7 @@ CircuitNode* CircuitTree::addSerial(CircuitNode *Node,
 
 CircuitNode* CircuitTree::addParallel(CircuitNode *Node, 
                                       bool Before, 
-                                      CirElem::CirElemType Type){
+                                      CircuitElement::CirElemType Type){
 
     CircuitNode* newNode = new CircuitNode(countNodeID++, CircuitNode::Element,NULL, Type);
     elementList.push_back(newNode);
@@ -147,7 +104,7 @@ CircuitNode* CircuitTree::addParallel(CircuitNode *Node,
      *  1. Create parallel / serial nodes as necessary
      *  2. Fix parent's children list
      *  3. Fix Node's dependence
-     *  4. Fix newNode's dependence **/
+     *  4. Fix newNode's dependence 
     switch (Node->Type) {
     default: break;
     case CircuitNode::Parallel:
@@ -239,7 +196,7 @@ CircuitGraph::CircuitGraph(CircuitTree *CirTree):
     NodeMap.front().push_back (&End);
     
 }
-
+*/
 
 
 

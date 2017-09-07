@@ -19,14 +19,20 @@ SOURCES += main.cpp\
     plotgraph.cpp \
     table_reader.cpp \
     circuittree.cpp \
-    dataseriestable.cpp
+    dataseriestable.cpp \
+    fittingwindow.cpp \
+    plotdualgraph.cpp \
+    circuitelement.cpp
 
 HEADERS  += mainwindow.h \
     impedance.h \
     plotgraph.h \
     table_reader.h \
     circuittree.h \
-    dataseriestable.h
+    dataseriestable.h \
+    fittingwindow.h \
+    plotdualgraph.h \
+    circuitelement.h
 
 RESOURCES += Icons.qrc
 

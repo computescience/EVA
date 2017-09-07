@@ -22,7 +22,7 @@
 
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), data_()      
+    : QMainWindow(parent), dataList()      
 {
     
     /// Initialize the impedance column titles
@@ -45,14 +45,14 @@ MainWindow::MainWindow(QWidget *parent)
             QIcon::fromTheme("document-save",QIcon(":/icons/save.png")),tr("Save data"),this);
     QAction* actClose = new QAction (
             QIcon::fromTheme("document-close", QIcon(":/icons/close.png")),tr("Close"), this);
+    QAction* actCircuit = new QAction (QIcon(":/icons/RCCircuit.png"),tr("Sim / Fit"), this);
     QAction* actCopyData = new QAction (
             QIcon::fromTheme("document-copy",QIcon(":/icons/copy.png")),tr("Copy data"),this);
     QAction* actZoomAll = new QAction (
             QIcon::fromTheme("document-zoom",QIcon(":/icons/full.png")),tr("Zoom to all"),this);
     QAction* actAbout = new QAction (
             QIcon::fromTheme("document-about",QIcon(":/icons/question-mark.png")),tr("About"),this);
-    
-    
+
     menuFile -> addAction (actImportData);
     menuFile -> addAction (actSaveData);
     menuFile -> addAction (actClose);
@@ -61,14 +61,16 @@ MainWindow::MainWindow(QWidget *parent)
     menuHelp -> addAction (actAbout);
     
     connect(actImportData,QAction::triggered,this, &importData);
+    connect(actCircuit, QAction::triggered, this, &StartFitting);
     
     /// Top tool bar
-    QToolBar* tbarMainTop = addToolBar(tr("Main toolbar"));
+    tbarMainTop = addToolBar(tr("Main toolbar"));
     tbarMainTop->setMovable(0);
     tbarMainTop -> addAction (actImportData);
+    tbarMainTop -> addAction (actCircuit);
 
     /// L0: Top level widget: central widget
-    QWidget* CentralArea = new QWidget (this);
+    CentralArea = new QWidget (this);
     setCentralWidget(CentralArea);
     CentralArea->setLayout(new QHBoxLayout);
     
@@ -79,7 +81,7 @@ MainWindow::MainWindow(QWidget *parent)
     DataListArea->setFixedWidth(170);
     DataListArea->setWidgetResizable(1);
     
-    dataTable = new DataSeriesTable(0);
+    dataTable = new DataSeriesTable(this);
     dataTableView = new QTableView(this);
     dataTableView->setModel(dataTable);    
     DataListArea ->setWidget(dataTableView);
@@ -87,6 +89,11 @@ MainWindow::MainWindow(QWidget *parent)
     dataTableView->setColumnWidth(1,80);
     dataTableView->setColumnWidth(2,20);
     dataTableView->setColumnWidth(3,20);
+    dataTableView->setSelectionMode(QTableView::SingleSelection);
+    dataTableView->setSelectionBehavior(QTableView::SelectRows);
+    dataTableView->update();
+    connect (this, SIGNAL(dataSeriesChanged()), 
+             dataTableView, SLOT(update()));
     
     /// + L1: Nyquist area
     QWidget* NyqstWidget = new QWidget (this);
@@ -112,13 +119,14 @@ MainWindow::MainWindow(QWidget *parent)
              this, SLOT(NyquistSelectionActivated(int)));
 
     /// +++ L3: Nyquist plot
-    plotNyqst = new PlotGraph (&data_,PLOT_HEIGHT,PLOT_HEIGHT,this);
+    plotNyqst = new PlotGraph (&dataList,PLOT_HEIGHT,PLOT_HEIGHT,this);
     NyqstWidget->layout() ->addWidget(plotNyqst);
     NyqstWidget->layout()->setAlignment(NyqstToolbar, Qt::AlignTop);
     plotNyqst->setSquareWidget(1);
     plotNyqst->setXData(impedance::Zreal, impedance::None);
     plotNyqst->setYData(impedance::Zimag, impedance::Neg);
     plotNyqst->setGraphName("Nyquist");
+    connect (this,&MainWindow::dataSeriesChanged, plotNyqst, &PlotGraph::Refresh);
     
     /// + L1: Bode area
     QWidget* BodeWidget = new QWidget (this);
@@ -146,8 +154,8 @@ MainWindow::MainWindow(QWidget *parent)
              this, SLOT(BodeSelectionActivated(int)));
     
     /// +++ L3: Bode plots
-    plotBode1 = new PlotGraph(&data_,BODE_WIDTH, PLOT_HEIGHT/2, this);
-    plotBode2 = new PlotGraph(&data_,BODE_WIDTH, PLOT_HEIGHT-PLOT_HEIGHT/2, this);
+    plotBode1 = new PlotGraph(&dataList,BODE_WIDTH, PLOT_HEIGHT/2, this);
+    plotBode2 = new PlotGraph(&dataList,BODE_WIDTH, PLOT_HEIGHT-PLOT_HEIGHT/2, this);
     plotBode1-> setMaximumWidth(BODE_WIDTH);
     plotBode2-> setMaximumWidth(BODE_WIDTH);
     BodeWidget->layout()->addWidget(plotBode1);
@@ -166,11 +174,21 @@ MainWindow::MainWindow(QWidget *parent)
     plotBode1->Refresh();
     plotBode2->Refresh();
     
+    connect (this,&MainWindow::dataSeriesChanged, plotBode1, &PlotGraph::Refresh);
+    connect (this,&MainWindow::dataSeriesChanged, plotBode2, &PlotGraph::Refresh);
+    
     colorSequenceNumber=0;
     setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
  
-    statusBar()->showMessage(tr("Ready"),0);
-
+    /// Initialize fitting GUI
+    fittingWindow = new FittingWindow(this, dataTable);
+    fittingWindow->fittingModeSelected(1);
+    fittingWindow->setModal(1);
+    
+    statusBar()->showMessage(tr("Ready"),2000);
+    
+    /// Connect the signals and slots
+    connect (this, &MainWindow::expSeriesEnabled, fittingWindow, &FittingWindow::expSeriesAvailable);
 }
 
 MainWindow::~MainWindow()
@@ -201,7 +219,6 @@ void MainWindow::importData(){
                 tr("Text files (*.txt);; All files (*)"));
             //("E:\\Documents\\programming\\Qt\\build-EIS-Desktop_Qt_5_7_0_MinGW_32bit-Debug\\EIS_Data.txt");
     if (importFileName.isNull()) return;
-
     
     table_reader importData;
     if (importData.open(importFileName.toStdString())){ //Error upon opening
@@ -228,15 +245,11 @@ void MainWindow::importData(){
     newData.setColor(QColor::fromHsv(((colorSequenceNumber++)*HUE_PROGRESSION)%256,255,255));
     newData.rename(dataName);
     
-    data_.push_back(newData);
+    dataList.push_back(newData);
+    dataTable->addDataSeries(&(dataList.back()));
     
-    plotNyqst->Refresh();
-    plotBode1->Refresh();
-    plotBode2->Refresh();
-
-    dataTable->appendDataSeries(&(data_.back()));
-    dataTableView->repaint();
-
+    emit expSeriesEnabled(1);
+    emit dataSeriesChanged();
 }
 
 void MainWindow::NyquistSelectionActivated(int index)
@@ -300,8 +313,12 @@ void MainWindow::BodeSelectionActivated(int index)
     }
     
     currentBodeSelection = index;
-    plotBode1->Refresh();
-    
+    plotBode1->Refresh();    
     plotBode2->Refresh();
     
+}
+
+void MainWindow::StartFitting()
+{
+    fittingWindow->show();
 }

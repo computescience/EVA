@@ -241,14 +241,13 @@ void PlotGraph::updateDataSeries() {
     for (QList<impedance>::iterator iDataSeries = data_source_->begin();
          iDataSeries!=data_source_->end(); iDataSeries++)
     {
-        appendSeries(*iDataSeries, Axes[0], Axes[1]);
+        appendSeries(*iDataSeries, 0, 1, SERIES_SHAPE);
     }
 }
 
 
-void PlotGraph::appendSeries(const impedance& newImp, 
-                             const QtCharts::QValueAxis* XAxis, 
-                             const QtCharts::QValueAxis* YAxis){
+void PlotGraph::appendSeries(const impedance& newImp, int HAxis, int VAxis, 
+                             QtCharts::QScatterSeries::MarkerShape shape ){
 
     if (newImp.isExp()){
         QtCharts::QScatterSeries* newSeries = new QtCharts::QScatterSeries(this);
@@ -258,14 +257,15 @@ void PlotGraph::appendSeries(const impedance& newImp,
             bool ExcepX=0;
             bool ExcepY=0;
             
-            double X = newImp.get(iPt, dataCol[0], dataMod[0],&ExcepX);
+            double X = newImp.get(iPt, dataCol[HAxis], dataMod[HAxis],&ExcepX);
             if (ExcepX) continue;
             
-            double Y = newImp.get(iPt, dataCol[1], dataMod[1],&ExcepY);
+            double Y = newImp.get(iPt, dataCol[VAxis], dataMod[VAxis],&ExcepY);
             if (ExcepY) continue;
             
             newSeries->append(X,Y);
         }
+        newSeries->setMarkerShape(shape);
         newSeries->setMarkerSize(DEFAULT_PT_SIZE);
         newSeries->setColor(newImp.color());
         newSeries->setPen(QPen(QBrush(QColor(Qt::black)),0.5));
@@ -282,10 +282,10 @@ void PlotGraph::appendSeries(const impedance& newImp,
             bool ExcepX=0;
             bool ExcepY=0;
             
-            double X = newImp.get(iPt, dataCol[0], dataMod[0],&ExcepX);
+            double X = newImp.get(iPt, dataCol[HAxis], dataMod[HAxis],&ExcepX);
             if (ExcepX) continue;
             
-            double Y = newImp.get(iPt, dataCol[1], dataMod[1],&ExcepY);
+            double Y = newImp.get(iPt, dataCol[VAxis], dataMod[VAxis],&ExcepY);
             if (ExcepY) continue;
             
             newSeries->append(X,Y);
@@ -295,7 +295,6 @@ void PlotGraph::appendSeries(const impedance& newImp,
         chart()->addSeries(newSeries);
         chart()->setAxisX(Axes[0],newSeries);
         chart()->setAxisY(Axes[1],newSeries);
-        
     }
 }
 

@@ -24,6 +24,8 @@ public:
     explicit PlotGraph(QList <impedance>* dataSource, 
                        int Width, int Height, 
                        QWidget* parent=0);
+    virtual ~PlotGraph() {} 
+    // Virtual destructor not really implemented, do not delete!
 
     // Widget setting
     void setSquareWidget (bool square=1){
@@ -53,9 +55,9 @@ public:
     void setGraphName (QString Name) {GraphName=Name;}
     
 public slots:
-    void Refresh ();
+    virtual void Refresh ();
     
-private:
+protected:
 
     // Widget properties
     int heightForWidth(int w) const override {
@@ -63,6 +65,7 @@ private:
     } 
     
     bool SquareWidget;
+    
     
     // Data source
     QList<impedance>* data_source_;    //List of data to plot
@@ -89,8 +92,6 @@ private:
     QMargins Mgn;
     
     bool square_aspect_ratio_;
-    bool X_reverse_;
-    bool Y_reverse_;
     
     /// Private Methods
     
@@ -104,8 +105,9 @@ private:
                          // modifies series data
     
     void appendSeries(const impedance& newImp, 
-                      const QtCharts::QValueAxis* XAxis, 
-                      const QtCharts::QValueAxis* YAxis); // Add a series to the back
+                      int HAxis, 
+                      int VAxis,
+                      QtCharts::QScatterSeries::MarkerShape shape); // Add a series to the back
     
     /// Constants
     constexpr const static float DEFAULT_FRAC_MARGIN=0.15;
@@ -114,7 +116,8 @@ private:
     static const int DEFAULT_H = 600;
     static const int DEFAULT_PT_SIZE = 5; //Default size of data point
     const QColor DEFAULT_LINE_COL = QColor(0,0,0,255);
-    
+    const QtCharts::QScatterSeries::MarkerShape SERIES_SHAPE = 
+            QtCharts::QScatterSeries::MarkerShapeCircle;
     // For debug purpose
     QString GraphName;
 };
