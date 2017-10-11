@@ -101,9 +101,9 @@ FittingWindow::FittingWindow(QWidget *parent,
     mainLayout->addWidget(parameterTableView, 1,0,1,1);
     parameterTableModel= new ParameterTableModel(&circuitModel, this);
     parameterTableView->setModel(parameterTableModel);
-    parameterTableView->setColumnWidth(0,20);
-    parameterTableView->setColumnWidth(1,50);
-    parameterTableView->setColumnWidth(2,50);
+    parameterTableView->setColumnWidth(0,25);
+    parameterTableView->setColumnWidth(1,40);
+    parameterTableView->setColumnWidth(2,40);
     parameterTableView->setColumnWidth(3,50);
     parameterTableView->setColumnWidth(4,50);
     parameterTableView->setColumnWidth(5,50);

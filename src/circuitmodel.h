@@ -37,7 +37,10 @@ public:
                               bool includeElementID = 1) const;
     
     int elemCount () const {return elementList.size();}
-    const CircuitElement& getElemInfo(int n) {return elementList.at(n)->elem;}
+    
+    // Read-only and non-read-only
+    const CircuitElement& accessElemRO(int n) const {return elementList.at(n)->elem;}
+    CircuitElement& accessElem(int n) {return elementList[n]->elem;}
     
     /// For diagram
     struct DiagramBlock{

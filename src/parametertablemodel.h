@@ -10,8 +10,8 @@ public:
     ParameterTableModel(CircuitModel* model, QObject *parent=NULL);
     
 public slots:
-    int rowCount(const QModelIndex &) const override{return RowCount;}
-    int columnCount(const QModelIndex &) const override {return 6;}
+    int rowCount(const QModelIndex &parent = QModelIndex()) const{return RowCount;}
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override {return 6;}
     
     QVariant headerData(int section, Qt::Orientation orientation, int role) const{
         if (role == Qt::DisplayRole && orientation==Qt::Horizontal){
@@ -40,10 +40,29 @@ public slots:
         return 1;
     }
     void refresh();
+    
+    /// Edit data
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override;    
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
 
 private:
     CircuitModel* circuitModel;
     int RowCount; // independently maintain a row count
+    
+    int findElement(int row, bool findPar = 0) const {
+        // Given a row number in the parameter table
+        // return the element number (if findPar is F)
+        // or parameter number (if findPar is T)
+        
+        int iElem=0;
+        while (row>=circuitModel->accessElemRO(iElem).varCount()){
+            row -= circuitModel->accessElemRO(iElem).varCount();
+            iElem++;
+        }
+        return findPar ? row : iElem;
+    }
+    
+    QString validateInputValue(double val, double min, double max, int whichWasChanged);
 };
 
 #endif // PARAMETERTABLEMODEL_H

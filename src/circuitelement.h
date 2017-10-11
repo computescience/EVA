@@ -70,7 +70,7 @@ public:
     int varCount () const {return VarVal.size();}
     
     void fixVariable (int v, bool fixed=1) {VarFixed[v]=fixed;}
-    bool variableFixed (int v) const {return VarFixed.at(v);}
+    bool varFixed (int v) const {return VarFixed.at(v);}
     
     QString varName(int v) const {return VarNames.at(v);}
     

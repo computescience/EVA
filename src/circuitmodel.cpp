@@ -307,7 +307,8 @@ QString CircuitModel::parseExpression(QString expression)
         if (OperatorStack.back()==QString("(")){
             return QString("Error: unpaired bracket \')\'");
         }
-        popOperator(OperatorStack,outputManager);
+        QString popState = popOperator(OperatorStack,outputManager);
+        if (!popState.isEmpty()) return popState;
     }
     
     if (outputManager.child.size()!=1) return QString("Error: missing operator");
