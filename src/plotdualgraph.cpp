@@ -19,6 +19,10 @@ PlotDualGraph::PlotDualGraph(QList<impedance> *dataSource,
     Axes[2]->setGridLineVisible(0);
     chart()->addAxis(Axes[2], Qt::AlignRight);
     Axes[2]->setVisible(0);    
+    
+    /// Override PlotGraph defaults
+    symbolSize = 6;
+    symbolLineWidth = 1;
 }
 
 void PlotDualGraph::Refresh()

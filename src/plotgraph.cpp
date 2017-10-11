@@ -28,6 +28,7 @@ PlotGraph::PlotGraph(QList<impedance> *dataSource,int Width, int Height, QWidget
     setMinimumWidth (Width);
     setMinimumHeight(Height);
     SquareWidget = 0;
+    usingSeriesColor = 1;
     Mgn.setLeft  (width() * fracMargin[0]);
     Mgn.setRight (width() * fracMargin[2]);
     Mgn.setTop   (height()* fracMargin[1]);
@@ -49,6 +50,10 @@ PlotGraph::PlotGraph(QList<impedance> *dataSource,int Width, int Height, QWidget
     setFrameStyle(QFrame::Sunken|QFrame::Box);
     setBackgroundRole(QPalette::Base);
     setAutoFillBackground(1);
+    
+    /// Chart Formatting
+    symbolSize = 5;
+    symbolLineWidth = 0.5;
     
     /// Default representation: logF vs logZabs;
     dataCol[0] = impedance::Fr;
@@ -266,9 +271,9 @@ void PlotGraph::appendSeries(const impedance& newImp, int HAxis, int VAxis,
             newSeries->append(X,Y);
         }
         newSeries->setMarkerShape(shape);
-        newSeries->setMarkerSize(DEFAULT_PT_SIZE);
-        newSeries->setColor(newImp.color());
-        newSeries->setPen(QPen(QBrush(QColor(Qt::black)),0.5));
+        newSeries->setMarkerSize(symbolSize);
+        newSeries->setColor(usingSeriesColor ? newImp.color() : QColor(Qt::white));
+        newSeries->setPen(QPen(QBrush(QColor(Qt::black)),symbolLineWidth));
        
         chart()->addSeries(newSeries);
         chart()->setAxisX(Axes[0],newSeries);
@@ -304,7 +309,6 @@ void PlotGraph::Refresh()
     autoScaleAxis(1);
     
     updateDataSeries();
-    
     update();
 }
 
@@ -314,13 +318,11 @@ void PlotGraph::manualScaleAxis(int whichAxis, double Min, double Max)
     if (Min >= Max) return; 
     
     // Set the pointer to properties of X/Y axis
-    double majUnit;
-    double minUnit;
+    double majUnit; 
     
     // If the axis is in log scale, then apply fixed maj interval of 1;
     if (dataMod[whichAxis] & impedance::Log) {
-        majUnit = 1;
-        minUnit = 0.5;
+        majUnit = 1;        
         NofMinUnits[whichAxis] = 1;
     }
     
@@ -341,7 +343,7 @@ void PlotGraph::manualScaleAxis(int whichAxis, double Min, double Max)
             majFrac = 0.2, minFrac=0.1, NofMinUnits[whichAxis]=2;
         }
         majUnit = majFrac * pow(10, orderSpan);
-        minUnit = minFrac * pow(10, orderSpan);        
+        //minUnit = minFrac * pow(10, orderSpan);        
     }
     
     int majorLo = floor (Min/(majUnit)); // Lowest major

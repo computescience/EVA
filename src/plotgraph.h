@@ -46,6 +46,10 @@ public:
         dataMod[1] = Mod;
     }
     
+    void useSeriesColor (bool enable=1) {
+        usingSeriesColor=enable;
+    }
+    
     void autoScaleAxis(int whichAxis); // whichAxis: X=0, Y=1;
     void manualScaleAxis (int whichAxis, double Min, double Max); 
         // This sets the axis to at least the range
@@ -53,6 +57,8 @@ public:
 
     // For debug
     void setGraphName (QString Name) {GraphName=Name;}
+    void setSymbolSize(int value) {symbolSize = value;}
+    void setSymbolLineWidth(double value) {symbolLineWidth = value;}
     
 public slots:
     virtual void Refresh ();
@@ -65,6 +71,7 @@ protected:
     } 
     
     bool SquareWidget;
+    bool usingSeriesColor;
     
     
     // Data source
@@ -91,6 +98,9 @@ protected:
     QVector <float> fracMargin;  //Fractions of margin {Left, Top, Right, Bottom}
     QMargins Mgn;
     
+    int symbolSize;
+    double symbolLineWidth;
+    
     bool square_aspect_ratio_;
     
     /// Private Methods
@@ -114,7 +124,7 @@ protected:
     static const int DEFAULT_PLOT_MARGIN = 10;
     static const int DEFAULT_W = 600;
     static const int DEFAULT_H = 600;
-    static const int DEFAULT_PT_SIZE = 5; //Default size of data point
+
     const QColor DEFAULT_LINE_COL = QColor(0,0,0,255);
     const QtCharts::QScatterSeries::MarkerShape SERIES_SHAPE = 
             QtCharts::QScatterSeries::MarkerShapeCircle;

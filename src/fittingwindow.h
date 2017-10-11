@@ -1,8 +1,11 @@
 #ifndef FITTINGWINDOW_H
 #define FITTINGWINDOW_H
 
+#include "circuitmodel.h"
+#include "circuitdiagram.h"
 #include "dataseriestable.h"
 #include "impedance.h"
+#include "parametertablemodel.h"
 #include "plotdualgraph.h"
 
 #include <QButtonGroup>
@@ -33,20 +36,30 @@ private:
     QList <impedance> fittedData;
     
     DataSeriesTable* seriesTable;
+    CircuitModel circuitModel;
+    ParameterTableModel* parameterTableModel;
 
     /// Window component    
-    QButtonGroup* fittingModeButtons; 
-    QRadioButton* selectSimButton;
-    QRadioButton* selectFitButton;
+    QButtonGroup*  fittingModeButtons; 
+    QRadioButton*  selectSimButton;
+    QRadioButton*  selectFitButton;
     QTableView*    seriesListView;
+    QTableView*    parameterTableView;
+    QLineEdit*     circuitExpressionEdit;
+    CircuitDiagram* circuitDiagram;
     PlotDualGraph* FittingGraph;
 
-    void dataSelectionChanged(const QVector<impedance *>& newData);
+    /// Circuit Elements
+    /*
+    QVector <CircuitElement> BasicElems;
+    QVector <CircuitElement> CustomElems;*/
     
-    const int DEFAULT_DUAL_GRAPH_SIZE = 400;
+    const int DEFAULT_DUAL_GRAPH_SIZE = 420;
     
 private slots:
+    void dataSelectionChanged(const QVector<impedance *>& newData);
     void fittingDataSelected(QModelIndex index);
+    void circuitExpressionAccepted();
 };
 
 #endif // FITTINGWINDOW_H

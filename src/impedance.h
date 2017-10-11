@@ -14,7 +14,7 @@ class impedance
 {
 public:
 
-    //impedance(size_t dataSize); //Create an uninitialized array
+    //impedance(int dataSize); //Create an uninitialized array
     impedance (const std::vector<double>& Freq,
                const std::vector<double>& Zr,
                const std::vector<double>& Zi);
@@ -34,10 +34,9 @@ public:
                   Sqrt=8, SqrtNeg=9, SqrtAbs=10};
     
     /// Constants
-    //enum ExtemeTypes {Zero, PosMin, PosMax, NegMin, NegMax};
 
-    const static size_t NOF_MOD = 3;
-    const static size_t NOF_EXTREME = 5; //zero, pos_min, pos_max, neg_min,neg_max
+    const static int NOF_MOD = 3;
+    const static int NOF_EXTREME = 5; //zero, pos_min, pos_max, neg_min,neg_max
     
     // Using a bracket operator to directly extract the top-level data (type of data)
     inline const QVector<QVector <double> >& operator [] (Column Col) const{return data_[Col];}
@@ -76,14 +75,14 @@ public:
     
     
     /// Methods
-    void resize(size_t size);
-    inline size_t size() const {return size_;}
+    void resize(int size);
+    inline int size() const {return size_;}
     void rename(QString newName) {name_ = newName;}
     QString dataName () const {return name_;}
     
-    inline void setF(size_t i, double freq) {if (i<size_) data_[Fr   ][0][i] = freq;}
-    inline void setR(size_t i, double Zre ) {if (i<size_) data_[Zreal][0][i] = Zre;}
-    inline void setI(size_t i, double Zim ) {if (i<size_) data_[Zimag][0][i] = Zim;}
+    inline void setF(int i, double freq) {if (i<size_) data_[Fr   ][0][i] = freq;}
+    inline void setR(int i, double Zre ) {if (i<size_) data_[Zreal][0][i] = Zre;}
+    inline void setI(int i, double Zim ) {if (i<size_) data_[Zimag][0][i] = Zim;}
     
     /* Tell the extremes of each type of data */
     
@@ -109,7 +108,7 @@ public:
     static void initializeColumnTitle ();
     
 private:
-    size_t size_;
+    int size_;
     
     QVector <QVector<QVector<double> > > data_;  
     //A 3-D array to store the data:

@@ -90,6 +90,7 @@ private slots:
     void NyquistSelectionActivated(int index);
     void BodeSelectionActivated(int index);
     void StartFitting();
+    void updateDataListTable();
 
 signals:
     void dataSeriesChanged();

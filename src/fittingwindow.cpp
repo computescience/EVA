@@ -1,8 +1,10 @@
 #include "fittingwindow.h"
 
 #include <QComboBox>
+#include <QDir>
 #include <QGridLayout>
 #include <QGroupBox>
+#include <QHeaderView>
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QListView>
@@ -64,37 +66,59 @@ FittingWindow::FittingWindow(QWidget *parent,
     selectSimButton->setChecked(1);
 
     /// ++ L2 List of fit data series
-    //seriesTable = new DataSeriesTable(this);
+    seriesListView->setMinimumHeight(180);
+    seriesListView->horizontalHeader()->setVisible(0);
     seriesListView->setModel(seriesTable);
     seriesListView->setColumnHidden(0,1);
     seriesListView->setColumnHidden(2,1);
     seriesListView->setColumnHidden(3,1);
-    seriesListView->setColumnWidth(1,120);
+    seriesListView->setColumnWidth(1,250);
     seriesListView->setSelectionMode(QTableView::SingleSelection);
     seriesListView->setSelectionBehavior(QTableView::SelectRows);
     
     /// + L1 Circuit pane
-    QFrame* circuitDiagramFrame = new QFrame(this);
+    QScrollArea* circuitDiagramFrame = new QScrollArea(this);
     circuitEditorLayout->addWidget(circuitDiagramFrame);
     
     /// + L2 CircuitDiagramFrame
-    circuitDiagramFrame->setBackgroundRole(QPalette::Background);
     circuitDiagramFrame->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    circuitDiagram = new CircuitDiagram (&circuitModel, this);
+    circuitDiagramFrame-> setWidget(circuitDiagram);
+   
+    circuitDiagram->resize(100,100);
     
     /// ++ L2 Circuit expression editor
     QHBoxLayout* circuitExpressionEditLayout = new QHBoxLayout;
     circuitEditorLayout->addLayout(circuitExpressionEditLayout);
-    QLineEdit* circuitExpressionEdit = new QLineEdit();
+    circuitExpressionEdit = new QLineEdit();
     circuitExpressionEditLayout-> addWidget(circuitExpressionEdit);
-    QPushButton* circuitExpressionConfirm = new QPushButton ("OK", this);
+    QPushButton* circuitExpressionConfirm = new QPushButton ("Accept", this);
     circuitExpressionEditLayout->addWidget(circuitExpressionConfirm);
+    connect (circuitExpressionConfirm,SIGNAL(clicked(bool)), this,SLOT(circuitExpressionAccepted()));
     
     /// + L1 ParameterPane
+    parameterTableView = new QTableView(this);
+    mainLayout->addWidget(parameterTableView, 1,0,1,1);
+    parameterTableModel= new ParameterTableModel(&circuitModel, this);
+    parameterTableView->setModel(parameterTableModel);
+    parameterTableView->setColumnWidth(0,20);
+    parameterTableView->setColumnWidth(1,50);
+    parameterTableView->setColumnWidth(2,50);
+    parameterTableView->setColumnWidth(3,50);
+    parameterTableView->setColumnWidth(4,50);
+    parameterTableView->setColumnWidth(5,50);
     
     /// + L1 Fitting Graph
-    FittingGraph = new PlotDualGraph(&fittedData, DEFAULT_DUAL_GRAPH_SIZE, DEFAULT_DUAL_GRAPH_SIZE, this);
+    FittingGraph = new PlotDualGraph(&fittedData, 
+                                     DEFAULT_DUAL_GRAPH_SIZE, 
+                                     DEFAULT_DUAL_GRAPH_SIZE, 
+                                     this);
+    FittingGraph->setSquareWidget(1);
     fittingGraphPane->setLayout(new QHBoxLayout);
     fittingGraphPane->layout()->addWidget(FittingGraph);
+    FittingGraph->useSeriesColor(0);
+    
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     
     /// Connect signal/slot
     connect (fittingModeButtons, static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked),
@@ -120,12 +144,22 @@ void FittingWindow::fittingModeSelected(int buttonId)
 {
     
     bool selectSim = buttonId;
-    for (int row=0; row<seriesTable->nofExp(); row++){
-        seriesListView->setRowHidden(row,selectSim);
-        // If selectSim is true, then exp rows hidden, else show
+    
+    // In case fitting mode is changed from program and not user input,
+    // then the button selection is manually changed
+    if (buttonId != fittingModeButtons->checkedId()) {
+        fittingModeButtons->button(buttonId)->setChecked(1);
     }
-    for (int row=seriesTable->nofExp(); row<seriesTable->nofTotal(); row++){
+    
+    const int rowHeight = 16;
+    for (int row=0; row<seriesTable->nofExp(); row++){
+        seriesListView->setRowHidden(row, selectSim);
+        // If selectSim is true, then exp rows hidden, else show
+        seriesListView->setRowHeight(row, rowHeight);
+    }
+    for (int row=seriesTable->nofExp(); row<=seriesTable->nofTotal(); row++){
         seriesListView->setRowHidden(row, !selectSim);
+        seriesListView->setRowHeight(row, rowHeight);
     }
 
     // Set Section to the last exp / sim
@@ -143,6 +177,9 @@ void FittingWindow::fittingDataSelected(QModelIndex index)
 {
     int row = index.row();
     if (row<0) return;
+    
+    seriesListView->selectRow(row);
+    
     QVector <impedance*> currentSelection;
 
     if (row != seriesTable->nofTotal())  {
@@ -150,5 +187,18 @@ void FittingWindow::fittingDataSelected(QModelIndex index)
         currentSelection.push_back(seriesTable->getSim(row));
     }
     dataSelectionChanged(currentSelection);
+}
+
+void FittingWindow::circuitExpressionAccepted()
+{
+    QString errorMsg = 
+            circuitModel.parseExpression(circuitExpressionEdit->text());
+    if (errorMsg.size()){
+        QMessageBox::warning(this,tr("Error"),errorMsg);
+    }
+    circuitExpressionEdit->setText(circuitModel.toMathExpression());
+    circuitDiagram->updateDiagram();
+    circuitDiagram->update();
+    parameterTableModel->refresh();
 }
 

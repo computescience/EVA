@@ -24,7 +24,6 @@ public slots:
     
 private:
     void updateSecondaryDataSeries();
-    //bool displaySecondary;
 
     QList<QtCharts::QScatterSeries *> plotSecondaryExpSeries;
     QList<QtCharts::QLineSeries *>    plotSecondaryFitSeries;

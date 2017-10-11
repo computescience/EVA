@@ -10,9 +10,11 @@
 
 table_reader::table_reader(int Sep, bool MultiAsOne): 
     table_(0),table_int_(0),table_long_(0),table_float_(0),table_double_(0),
-    rows_(0),cols_(0),status_(0),sep_(Sep),multiple_as_one_(MultiAsOne)
+    rows_(0),cols_(0)
 {
-    
+    status_ = 0;
+    sep_ = 0;
+    multiple_as_one_ = MultiAsOne;
 }
 
 table_reader::~table_reader(){}
@@ -46,7 +48,7 @@ int table_reader::open(const std::string &FileName, bool Header,
     
     /** Process the first line for the number of columns**/
     std::vector <int> index_sep;     
-    for (int iChar = 0; iChar < LineBuffer.size(); iChar++){
+    for (size_t iChar = 0; iChar < LineBuffer.size(); iChar++){
         
         separator CurrentCharType = None;
         if (LineBuffer[iChar] == '\t') CurrentCharType = Tab;
@@ -66,13 +68,13 @@ int table_reader::open(const std::string &FileName, bool Header,
     if (!index_sep .size()) return status_ |= LineError;
     cols_ = index_sep.size()+1;
     
-    for (int iSeg = 0; iSeg<cols_;iSeg++){
+    for (size_t iSeg = 0; iSeg<cols_;iSeg++){
         header_.push_back(std::string("Column") + char('0'+iSeg));
     }
     
     if (Header){
         header_[0]= LineBuffer.substr(0, index_sep[0]);
-        for (int iSeg = 1; iSeg<index_sep.size();iSeg++){
+        for (size_t iSeg = 1; iSeg<index_sep.size();iSeg++){
             header_[iSeg]=std::string(LineBuffer, index_sep[iSeg-1]+1, 
                               index_sep[iSeg]-index_sep[iSeg-1]-1);
         }
@@ -97,7 +99,7 @@ int table_reader::open(const std::string &FileName, bool Header,
         }
         
         std::vector <int> index_sep_data;  // index_sep_data <= index_sep
-        for (int iChar = 0; iChar < LineBuffer.size(); iChar++){
+        for (size_t iChar = 0; iChar < LineBuffer.size(); iChar++){
 
             separator CurrentCharType = None;
             if (LineBuffer[iChar] == '\t') CurrentCharType = Tab;

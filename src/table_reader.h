@@ -76,7 +76,7 @@ private:
     void convert(size_t col, std::vector <T>& values, T MISSING_VAL) {
         //col is assumed safe
         values.assign(rows_, MISSING_VAL);
-        for (int row = 0; row<rows_; row++){
+        for (size_t row = 0; row<rows_; row++){
             std::stringstream s (table_ [col] [row]);
             s >> values [row];
             if (s.fail()) status_ |= ParseError;

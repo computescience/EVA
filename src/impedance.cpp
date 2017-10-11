@@ -1,23 +1,6 @@
 #include "impedance.h"
 #include <cmath>
 
-/*
-impedance::impedance(size_t dataSize):
-        visible_(1),
-        size_(dataSize), data_( //A three-layered initialization call
-            NOF_TYPE, QVector<QVector<double> > (
-                NOF_MOD, QVector<double> (dataSize, 0))),
-        extremes_( //A two-layered initialization call
-            NOF_TYPE, QVector<double>  (NOF_EXTREME,0))        
-{
-    data_.reserve(NOF_TYPE);
-    extremes_.reserve(NOF_TYPE);
-    for (size_t iType =0; iType<NOF_TYPE; iType++) {
-        data_[iType].reserve(NOF_MOD);
-    }
-    isExp_ = 1;
-}*/
-
 impedance::impedance(const std::vector<double> &Freq,
                      const std::vector<double> &Zr,
                      const std::vector<double> &Zi):
@@ -29,11 +12,11 @@ impedance::impedance(const std::vector<double> &Freq,
 {
     size_=Freq.size();
 
-    for (size_t iType =0; iType<NOF_TYPE; iType++) {
+    for (int iType =0; iType<NOF_TYPE; iType++) {
         data_[iType].reserve(NOF_MOD);
     }
     
-    for (size_t iFr = 0; iFr<size_; iFr++){
+    for (int iFr = 0; iFr<size_; iFr++){
         //Unsafe, must ensure externally that Zreal and Zimag has no smaller size than Freq
         data_[Fr][0][iFr]= Freq [iFr];
         data_[Zreal][0][iFr]= Zr[iFr];
@@ -46,10 +29,10 @@ impedance::impedance(const std::vector<double> &Freq,
     
 }
 
-void impedance::resize(size_t size) {
+void impedance::resize(int size) {
     size_=size; 
-    for (size_t iType = 0; iType<NOF_TYPE;iType++){
-        for (size_t iMod = 0; iMod<NOF_MOD;iMod++){
+    for (int iType = 0; iType<NOF_TYPE;iType++){
+        for (int iMod = 0; iMod<NOF_MOD;iMod++){
             data_[iType][iMod].resize(size);
         }
     }
@@ -60,7 +43,7 @@ int impedance::validate_(){
     if (!size_) return 0;
     
     int errors = 0;
-    for (size_t iFr=0; iFr<size_; iFr++){
+    for (int iFr=0; iFr<size_; iFr++){
         while ((data_[Fr][0][iFr]<=0 || //Screen out lines Freq[iFr]==0 or Zabs[abs]==0
                 data_[Zreal][0][iFr]*data_[Zreal][0][iFr]+
                 data_[Zimag][0][iFr]*data_[Zimag][0][iFr]==0)){
@@ -73,21 +56,21 @@ int impedance::validate_(){
     
     size_ = data_[0][0].size();
     
-    for (size_t iTy=0; iTy<3; iTy++){ 
+    for (int iTy=0; iTy<3; iTy++){ 
         // Initialize the modified arrays of the first 3 cols
         // Use fill() will also initialize the value
         data_[iTy][1].fill(0, size_); 
         data_[iTy][2].fill(0, size_);
     }
 
-    for (size_t iTy =3; iTy<NOF_TYPE; iTy++){ //Initialize the rest of the array
+    for (int iTy =3; iTy<NOF_TYPE; iTy++){ //Initialize the rest of the array
         data_[iTy][0].fill(0, size_);
         data_[iTy][1].fill(0, size_);
         data_[iTy][2].fill(0, size_);
     }
     
     /// Update the derived data 
-    for (size_t iFr =0; iFr<size_; iFr++){
+    for (int iFr =0; iFr<size_; iFr++){
         
         double Zsqr = data_[Zreal][0][iFr]*data_[Zreal][0][iFr] 
                     + data_[Zimag][0][iFr]*data_[Zimag][0][iFr];
@@ -104,18 +87,18 @@ int impedance::validate_(){
     }
     
     /// Update the modifiers
-    for (size_t iTy=0; iTy<NOF_TYPE;iTy++){
-        for (size_t iFr=0; iFr<size_;iFr++){
+    for (int iTy=0; iTy<NOF_TYPE;iTy++){
+        for (int iFr=0; iFr<size_;iFr++){
             data_[iTy][1][iFr] = (data_[iTy][0][iFr]==0) ? 0 : log10(std::abs(data_[iTy][0][iFr]));
             data_[iTy][2][iFr] = sqrt (std::abs(data_[iTy][0][iFr]));
         }
     }
     
     /// Update the extremes
-    for (size_t iTy=0; iTy<NOF_TYPE;iTy++){ 
+    for (int iTy=0; iTy<NOF_TYPE;iTy++){ 
         extremes_[iTy].fill(0,NOF_EXTREME); //Initialize with 0
         
-        for (size_t iFr=0; iFr<size_;iFr++){
+        for (int iFr=0; iFr<size_;iFr++){
             
             double& value = data_[iTy][0][iFr];
             double& pos_min= extremes_[iTy][1];

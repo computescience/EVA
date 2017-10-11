@@ -21,8 +21,8 @@ class DataSeriesTable : public QAbstractTableModel
     
 public:
     explicit DataSeriesTable(QObject *parent);
-    int rowCount(const QModelIndex &parent) const override;
-    int columnCount(const QModelIndex &parent) const override;
+    int rowCount(const QModelIndex &) const override {return expSeries.size() + 1;}
+    int columnCount(const QModelIndex &) const override {return 4;}
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
@@ -30,6 +30,7 @@ public:
     int nofTotal () const {return expSeries.size();}
     impedance* getExp(int row) const {return expSeries.at(row);}
     impedance* getSim(int row) const {return simSeries.at(row);}
+    //void setAddNewLine (bool add=1){addNewLine = add;}
     
 public slots:
     void addDataSeries(impedance* newDataSeries);

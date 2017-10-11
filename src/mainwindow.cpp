@@ -91,7 +91,7 @@ MainWindow::MainWindow(QWidget *parent)
     dataTableView->setColumnWidth(3,20);
     dataTableView->setSelectionMode(QTableView::SingleSelection);
     dataTableView->setSelectionBehavior(QTableView::SelectRows);
-    dataTableView->update();
+    updateDataListTable();
     connect (this, SIGNAL(dataSeriesChanged()), 
              dataTableView, SLOT(update()));
     
@@ -182,13 +182,13 @@ MainWindow::MainWindow(QWidget *parent)
  
     /// Initialize fitting GUI
     fittingWindow = new FittingWindow(this, dataTable);
-    fittingWindow->fittingModeSelected(1);
     fittingWindow->setModal(1);
     
     statusBar()->showMessage(tr("Ready"),2000);
     
     /// Connect the signals and slots
     connect (this, &MainWindow::expSeriesEnabled, fittingWindow, &FittingWindow::expSeriesAvailable);
+    showMaximized();
 }
 
 MainWindow::~MainWindow()
@@ -211,13 +211,13 @@ void MainWindow::importData(){
 #define DEBBUG_SIMPLIFY_FILENAME
     
 #ifdef DEBBUG_SIMPLIFY_FILENAME
-    dataFilePath = QString("E:/Documents/programming/Qt/EIS/Test");
+    dataFilePath = QString("E:/Documents/programming/Qt/EVA/Test");
 #endif
 
     QString importFileName = QFileDialog::getOpenFileName(
                 this,"Import",dataFilePath,
                 tr("Text files (*.txt);; All files (*)"));
-            //("E:\\Documents\\programming\\Qt\\build-EIS-Desktop_Qt_5_7_0_MinGW_32bit-Debug\\EIS_Data.txt");
+
     if (importFileName.isNull()) return;
     
     table_reader importData;
@@ -247,6 +247,7 @@ void MainWindow::importData(){
     
     dataList.push_back(newData);
     dataTable->addDataSeries(&(dataList.back()));
+    updateDataListTable();
     
     emit expSeriesEnabled(1);
     emit dataSeriesChanged();
@@ -320,5 +321,14 @@ void MainWindow::BodeSelectionActivated(int index)
 
 void MainWindow::StartFitting()
 {
+    fittingWindow->fittingModeSelected(1);
     fittingWindow->show();
+}
+
+void MainWindow::updateDataListTable()
+{
+    for (int i = 0; i<dataTable->nofTotal(); i++){
+        dataTableView->setRowHidden(i, 0);
+    }
+    dataTableView->setRowHidden(dataTable->nofTotal(),1);
 }

@@ -9,16 +9,6 @@ DataSeriesTable::DataSeriesTable(QObject* parent):
     nofExpSeries = 0;
 }
 
-int DataSeriesTable::rowCount(const QModelIndex &parent) const
-{
-    return simSeries.size();
-}
-
-int DataSeriesTable::columnCount(const QModelIndex &parent) const
-{
-    return 4;
-}
-
 QVariant DataSeriesTable::data(const QModelIndex &index, int role) const
 {
     int row = index.row();
@@ -26,6 +16,7 @@ QVariant DataSeriesTable::data(const QModelIndex &index, int role) const
     switch (role) {
     
     case Qt::DecorationRole:
+        if (index.row()==expSeries.size()) return QVariant();
         if (index.column()==0){
             impedance* dataSet = (expSeries.at(row)==NULL) ? 
                                   simSeries.at(row):expSeries.at(row);
@@ -34,6 +25,7 @@ QVariant DataSeriesTable::data(const QModelIndex &index, int role) const
         break;
         
     case Qt::CheckStateRole:
+        if (index.row()==expSeries.size()) return QVariant();
         if (index.column() == 2){
             if (row<expSeries.size())
             return expSeries.at(row)->isVisible() ? Qt::Checked : Qt::Unchecked;
@@ -45,12 +37,12 @@ QVariant DataSeriesTable::data(const QModelIndex &index, int role) const
         
     case Qt::DisplayRole:
         if (index.column()== 1){
-            impedance* dataSet = (row < expSeries.size()) ? 
-                                  expSeries.at(row):simSeries.at(row);
-            return dataSet->dataName();
+            if (index.row() == expSeries.size()) return QString("<new>");
+            return ((row < nofExpSeries) ? expSeries.at(row):simSeries.at(row)) -> dataName();
         }
         break;
     case Qt::FontRole:
+        if (index.row()==expSeries.size()) return QVariant();
         if (index.column()==1){
             QFont font (QString("calibri"),8);
             if (row>=nofExpSeries) font.setItalic(1);
