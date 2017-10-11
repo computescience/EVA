@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<element>
+<!-- Mandatory fields -->
+	<name>constant phase element</name>
+	<symbol>Q</symbol>
+	<expression>Q*(i*w)^n</expression>
+	<parameter>
+		<variable>Q</variable>
+		<value>1e-4</value>
+		<minimum>1e-20</minimum>
+		<maximum>10</maximum>
+	</parameter>
+	<parameter>
+		<variable>n</variable>
+		<value>0.9</value>
+		<minimum>0</minimum>
+		<maximum>1</maximum>
+	</parameter>
+	<!-- All the variables defined in the expression
+		must be listed except for reserved tokens:
+		i, f, w, pi, (and all standard functions)
+		All the 4 fields under must be given -->
+	
+<!-- Optional fields -->
+	<icon>cpe.png</icon>
+	<!-- Place the icon (32*32 png only) under folder ./elementicons -->
+	<description>A virtual element with a constant phase angle. Usually used to represent non-ideal capacitance. </description>
+	<source>
+		<reference>G. J. Brug, A. L. G. van den Eeden, M. Sluyters-Rehbach, J. H. Sluyters, J. Electroanal. Chem. Interf. Electrochem. 176, 275 (1984)</reference>
+		<doi>10.1016/S0022-0728(84)80324-1</doi>
+	</source>
+	<!-- reference is optional but recommended for
+	the benefit of the scientific community.
+	Follow any proper reference style of your
+	choice. A DOI is highly recommended -->
+</element>

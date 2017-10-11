@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<element>
+	<name>capacitor</name>
+	<symbol>C</symbol>
+	<expression>1/(i*w*C)</expression>
+	<parameter>
+		<variable>C</variable>
+		<value>1e-3</value>
+		<minimum>1e-20</minimum>
+		<maximum>10</maximum>
+	</parameter>
+	<icon>capacitor.png</icon>
+	<description>Capacitor</description>
+	<source>
+		<reference></reference>
+		<doi></doi>
+	</source>
+</element>

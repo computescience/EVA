@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<element>
+	<name>resistor</name>
+	<symbol>R</symbol>
+	<expression>R</expression>
+	<parameter>
+		<variable>R</variable>
+		<value>1</value>
+		<minimum>1e-20</minimum>
+		<maximum>1e20</maximum>
+	</parameter>
+	<icon>resistor.png</icon>
+	<description>Resistor</description>
+	<source>
+		<reference></reference>
+		<doi></doi>
+	</source>
+</element>

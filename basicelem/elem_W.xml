@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<element>
+	<name>walburg</name>
+	<symbol>W</symbol>
+	<expression>Rw / sqrt(i*w)</expression>
+	<parameter>
+		<variable>Rw</variable>
+		<value>1</value>
+		<minimum>1e-20</minimum>
+		<maximum>1e20</maximum>
+	</parameter>
+	<icon>warburg.png</icon>
+	<description>A CPE with 45 degree phase angle. Used in conjunction with charge-transfer resistance, this element represents the impedance induced by the concentration polarization near the electrode surface. It is different from finite-length Warburg impedance because this model simply assumes infinite thickness of the diffusion layer</description>
+	<source>
+		<reference></reference>
+		<doi></doi>
+	</source>
+</element>

@@ -5,34 +5,41 @@
 #-------------------------------------------------
 
 QT       += core gui\
-            charts
+            charts\
+            xml
+
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = EIS
+TARGET = EVA
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    impedance.cpp \
-    plotgraph.cpp \
-    table_reader.cpp \
-    circuittree.cpp \
-    dataseriestable.cpp \
-    fittingwindow.cpp \
-    plotdualgraph.cpp \
-    circuitelement.cpp
+SOURCES += src/main.cpp\
+        src/mainwindow.cpp \
+    src/impedance.cpp \
+    src/plotgraph.cpp \
+    src/table_reader.cpp \
+    src/dataseriestable.cpp \
+    src/fittingwindow.cpp \
+    src/plotdualgraph.cpp \
+    src/circuitelement.cpp \
+    src/circuitmodel.cpp \
+    src/circuitdiagram.cpp \
+    src/parametertablemodel.cpp
 
-HEADERS  += mainwindow.h \
-    impedance.h \
-    plotgraph.h \
-    table_reader.h \
-    circuittree.h \
-    dataseriestable.h \
-    fittingwindow.h \
-    plotdualgraph.h \
-    circuitelement.h
+HEADERS  += src/mainwindow.h \
+    src/impedance.h \
+    src/plotgraph.h \
+    src/table_reader.h \
+    src/dataseriestable.h \
+    src/fittingwindow.h \
+    src/plotdualgraph.h \
+    src/circuitelement.h \
+    src/circuitmodel.h \
+    src/circuitdiagram.h \
+    src/parametertablemodel.h
 
-RESOURCES += Icons.qrc
+RESOURCES += resources/Icons.qrc
+
 

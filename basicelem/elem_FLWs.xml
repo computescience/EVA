@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<element>
+	<name>finite-length warburg (short)</name>
+	<symbol>Ws</symbol>
+	<expression>Rw * tanh (sqrt(i*w*T)) / sqrt(i*w*T)</expression>
+	<parameter>
+		<variable>Rw</variable>
+		<value>1</value>
+		<minimum>1e-20</minimum>
+		<maximum>1e20</maximum>
+	</parameter>
+	<parameter>
+		<variable>T</variable>
+		<value>1</value>
+		<minimum>1e-20</minimum>
+		<maximum>1e20</maximum>
+	</parameter>
+	<icon>flws.png</icon>
+	<description>A diffusion-induced impedance element. Similar to the warburg impedance, this element has a 45-degree phase angle at high frequencies. At low frequencies, this element has an RC-like semi-circle. The difference is the fact that the diffusion layer now has a finite thickness, beyond which the solute is maintained as the bulk concentration. The characteristic time constant of this element, T, has the expression: T=L^2/D, where L is the characteristic thickness of the diffusion layer, and D is the diffusivity of the diffusing species</description>
+	<source>
+		<reference></reference>
+		<doi></doi>
+	</source>
+</element>

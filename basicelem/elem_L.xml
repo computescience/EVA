@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<element>
+	<name>inductor</name>
+	<symbol>L</symbol>
+	<expression>i*w*L</expression>
+	<parameter>
+		<variable>L</variable>
+		<value>1e-3</value>
+		<minimum>1e-20</minimum>
+		<maximum>1e20</maximum>
+	</parameter>
+	<icon>inductor.png</icon>
+	<description>Inductance behavior with a phase angle of +90 degrees</description>
+	<source>
+		<reference></reference>
+		<doi></doi>
+	</source>
+</element>
