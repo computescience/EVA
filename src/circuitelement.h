@@ -11,23 +11,14 @@
 #include <cmath>
 
 struct token {
-    enum tokenType{Null=1024, Numeric, Complex, Variable, Function, Operator};
-    // Null for passing error message or simply setu
+    enum tokenType{Null, Numeric, Complex, Variable, Function, Operator};
+    // Null for passing error message or simply set a placeholder
     
     enum operType {OpAdd, OpMin, OpMul, OpDiv, OpPow, LBra, RBra};
     //Means operations: add, minus, muliply, divide, power to, left, right bracket
     
     constexpr static const double Pi = 3.14159265359;
 
-    static const char* const stdFun [12]; // standard functions
-
-    static int isStdFunc (const QString& s){
-        for (int i=0; i<12; i++) {
-            if (s == QString(stdFun[i])) return i;
-        }
-        return -1;
-    }
-    
     token() {Type=Null;}
     token(double  V) : v(V) {Type=Numeric;}
     token(QString S) : s(S) {Type=Variable;}
@@ -36,7 +27,6 @@ struct token {
     token(operType O, int Prec, bool RightAss=0) : 
         o(O), opPrec(Prec), rightAss(RightAss){Type = Operator;}
       
-    
     tokenType Type;
     double       v;  // value
     QString      s;  // string
@@ -92,6 +82,15 @@ public:
     
     QString toRPN() const;
     
+    enum MathError{NoError, DivByZero, PowerZeroToZero, LogZero};
+    std::complex <double> evaluate(double freq, MathError *err=NULL);
+    
+    //static const char* const stdFun [12]; // standard functions
+    
+    static void initializeStdFunLib(); 
+    // Call it once before constructing any object
+    
+    
 private:
     
     /// Identity
@@ -118,7 +117,24 @@ private:
     /// For importing from XML
     QString importErrorMsg;
     bool ImportSuccess;
-
+    
+    /// Library for standard functions and their math names
+    struct stdFunc{
+        stdFunc(QString n, std::complex<double> (*f)(std::complex<double>),\)
+            : func(f), name(n){}
+        std::complex<double> (*func)(std::complex<double>); // Func pointer
+        QString name;
+    };
+    static QVector <stdFunc> stdFunLib;
+    static int isStdFunc (const QString& s){
+        for (int i=0; i<12; i++) {
+            if (s == stdFunLib.at(i).name) return i;
+        }
+        return -1;
+    }
+    static std::complex<double> calculate(int funNum, std::complex<double> z){
+        return stdFunLib.at(funNum) (z);
+    }
 };
 
 #endif // CIRCUITELEMENT_H

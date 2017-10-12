@@ -66,6 +66,7 @@ public:
         return Icons.at (index==-1 ? 0 : index);
     }
     
+    std::complex <double> evaluate (double freq);
 private:
     
     QVector <QVector <DiagramBlock> > generateDiagramChunk(CircuitNode* Node) const;
@@ -82,6 +83,8 @@ private:
     static QVector <QString> ElementLibrary; // Collection of recognized element names
     static QVector <QString> IconNames;
     static QVector <QImage>  Icons;
+    
+    std::complex <double> evaluateNode (double freq, CircuitNode* node);
 };
 
 #endif // CIRCUITMODEL_H

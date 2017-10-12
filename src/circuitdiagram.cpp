@@ -9,7 +9,10 @@ CircuitDiagram::CircuitDiagram(const CircuitModel* model, QWidget *parent) :
     blockMap(),
     BLANK_BLOCK(BLOCK_W, BLOCK_H, QImage::Format_RGB32)
 {
+    /// Initialize some static members
+    CircuitElement::initializeStdFunLib();
     CircuitModel::initializeElementLibrary();
+    
     BLANK_BLOCK.fill(Qt::white);
     setAutoFillBackground(1);
     /// Import icons from folder "elementicons"

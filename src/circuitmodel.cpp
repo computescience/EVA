@@ -2,6 +2,7 @@
 #include <QDir>
 
 #include <QMessageBox>
+typedef std::complex <double> complex;
 
 QString popOperator(QVector<QString>& operStack,
                     CircuitModel::CircuitNode& outputManager){
@@ -16,7 +17,6 @@ QString popOperator(QVector<QString>& operStack,
     CircuitModel::CircuitNode::NodeType OperatorType = 
             operStack.back()==QString("+")? CircuitModel::CircuitNode::SerialJoint
                                           : CircuitModel::CircuitNode::ParallelJoint;
-            
 
     if (Node1->Type==OperatorType && Node2->Type==OperatorType){
         // Transfer all children under Node 2 to Node 1
@@ -528,6 +528,14 @@ QVector<QVector<CircuitModel::DiagramBlock> > CircuitModel::generateDiagramChunk
         }
     }
     return assembledChunk;
+}
+
+std::complex<double> CircuitModel::evaluateNode(double freq, CircuitModel::CircuitNode *node)
+{
+    if (node->Type == CircuitNode::Element){
+        
+    }
+    else if (node->Type == )
 }
 
 QVector <QString> CircuitModel::ElementLibrary = QVector<QString>();

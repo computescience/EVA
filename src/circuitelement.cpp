@@ -2,6 +2,8 @@
 #include <QChar>
 #include <QtXml/QDomDocument>
 
+typedef std::complex<double> complex;
+
 QVector <token> parseInput  (QString input);
 QVector <token> shuntingYard(QVector<token> input);
 
@@ -194,6 +196,89 @@ QString CircuitElement::toRPN() const
     return Output;
 }
 
+std::complex<double> CircuitElement::evaluate(double freq, MathError *err)
+{
+    if (err!=NULL) *err = NoError;
+    
+    QVector <complex> output;
+    
+    for (int iToken=0; iToken<formula.size(); iToken++){        
+        const token& Token = formula.at(iToken);
+        
+        switch (Token.Type){
+        default: break;
+        case token::Numeric: output.push_back(Token.z); break;
+        case token::Complex: output.push_back(Token.v); break;
+            
+        case token::Variable:
+            if (Token.s==QString("f")) output.push_back(freq);
+            else if (Token.s==QString("w")) output.push_back(2*token::Pi*freq);
+            else output.push_back(VarVal.at(VarNames.indexOf(Token.s))); 
+            break;
+            
+        case token::Function:
+            output.back = calculate(Token.f, output.back());
+            break;
+            
+        case token::Operator:
+            switch(Token.o){
+            case token::OpAdd:
+                output[output.size()-2] += output[output.size()-1];
+                break;
+            case token::OpMin:
+                output[output.size()-2] -= output[output.size()-1];
+                break;
+            case token::OpMul:
+                output[output.size()-2] *= output[output.size()-1];
+                break;
+            case token::OpDiv:
+                if (output[output.size()-1] == complex(0,0)) {
+                    if (err!=NULL) *err = DivByZero; 
+                    return 0;
+                }
+                else {
+                    output[output.size()-2] *= output[output.size()-1];
+                }
+                break;
+            case token::OpPow:
+                if (output[output.size()-1] == complex(0,0)&&
+                        output[output.size()-2] == complex(0,0)){
+                    if (err!=NULL) *err = PowerZeroToZero;
+                }
+                else{
+                    output[output.size()-2] = pow(
+                            output[output.size()-2],
+                            output[output.size()-1]);
+                }
+                break;
+            } // End of switch(Token.o)
+            output.pop_back();
+            break;
+        }// End of switch(Token.Type)
+    }
+}
+
+/// Definition for extended standard functions
+complex cot  (complex z) {return 1/tan (z);}
+complex coth (complex z) {return 1/tanh(z);}
+
+void CircuitElement::initializeStdFunLib()
+{
+    stdFunLib.push_back(stdFunc("sin",  std::sin));
+    stdFunLib.push_back(stdFunc("cos",  std::cos));
+    stdFunLib.push_back(stdFunc("tan",  std::tan));
+    stdFunLib.push_back(stdFunc("cot",  cot));
+    stdFunLib.push_back(stdFunc("sinh", std::sinh));
+    stdFunLib.push_back(stdFunc("cosh", std::cosh));
+    stdFunLib.push_back(stdFunc("tanh", std::tanh));
+    stdFunLib.push_back(stdFunc("coth", coth));
+    stdFunLib.push_back(stdFunc("abs",  std::abs));
+    stdFunLib.push_back(stdFunc("sqrt", std::sqrt));
+    stdFunLib.push_back(stdFunc("ln",   std::log));
+    stdFunLib.push_back(stdFunc("log",  std::log10));
+    stdFunLib.push_back(stdFunc("exp",  std::exp));    
+}
+
 QVector<token> parseInput(QString input){
 
     QVector <token> sortedInput;
@@ -384,13 +469,21 @@ QVector <token> shuntingYard(QVector<token> input){
 
 }
 
-
+/*
 const char* const token::stdFun [] = {
-    "sin", "cos", "tan", 
-    "sinh", "cosh", "tanh","coth",
-    "abs", "sqrt", 
-    "ln", "log", "exp"
-};
+    "sin",  //0
+    "cos",  //1
+    "tan",  //2
+    "sinh", //3
+    "cosh", //4
+    "tanh", //5
+    "coth", //6
+    "abs",  //7
+    "sqrt", //8
+    "ln",   //9
+    "log",  //10
+    "exp"   //11
+};*/
 
 
 /** Reference to the shunting yard algorithm
