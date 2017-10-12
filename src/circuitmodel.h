@@ -66,7 +66,9 @@ public:
         return Icons.at (index==-1 ? 0 : index);
     }
     
-    std::complex <double> evaluate (double freq);
+    std::complex <double> evaluate (double freq){
+        return evaluateNode(freq,rootNode);
+    }
 private:
     
     QVector <QVector <DiagramBlock> > generateDiagramChunk(CircuitNode* Node) const;

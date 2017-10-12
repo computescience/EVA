@@ -35,7 +35,7 @@ FittingWindow::FittingWindow(QWidget *parent,
         Fitting graph (BR)
     **/
 
-    QVBoxLayout* fittingOptionsLayout = new QVBoxLayout();
+    QGridLayout* fittingOptionsLayout = new QGridLayout();
     QVBoxLayout* circuitEditorLayout  = new QVBoxLayout;
     QWidget* paramEditPane      = new QWidget(this);
     QWidget* fittingGraphPane   = new QWidget(this);
@@ -43,15 +43,18 @@ FittingWindow::FittingWindow(QWidget *parent,
     setLayout(mainLayout);
     mainLayout->addLayout(fittingOptionsLayout,0,0,1,1);
     mainLayout->addLayout(circuitEditorLayout ,0,1,1,1);
-    mainLayout->addWidget(paramEditPane     ,1,0,1,1);
-    mainLayout->addWidget(fittingGraphPane  ,1,1,1,1);
+    mainLayout->addWidget(paramEditPane       ,1,0,1,1);
+    mainLayout->addWidget(fittingGraphPane    ,1,1,1,1);
     
     /// + L1 Fitting options pane
     QGroupBox* fittingModeGroupBox = new QGroupBox(this);
     seriesListView = new QTableView (this);
     
-    fittingOptionsLayout -> addWidget(fittingModeGroupBox);
-    fittingOptionsLayout -> addWidget(seriesListView);
+    fittingOptionsLayout -> addWidget(fittingModeGroupBox,0,0,1,1);
+    fittingOptionsLayout -> addWidget(seriesListView,     0,1,1,1);
+    QPushButton* startSimFitButton = new QPushButton(tr("Start"));
+    connect(startSimFitButton, SIGNAL(clicked()), 
+            this, SLOT(startSimFitButtonPushed()));
     
     /// ++ L2 Fitting mode buttons
     fittingModeGroupBox->setLayout(new QHBoxLayout);
@@ -68,11 +71,11 @@ FittingWindow::FittingWindow(QWidget *parent,
     /// ++ L2 List of fit data series
     seriesListView->setMinimumHeight(180);
     seriesListView->horizontalHeader()->setVisible(0);
-    seriesListView->setModel(seriesTable);
+    seriesListView->setModel(seriesTable); // Link to the same series table as MainWindow
     seriesListView->setColumnHidden(0,1);
     seriesListView->setColumnHidden(2,1);
     seriesListView->setColumnHidden(3,1);
-    seriesListView->setColumnWidth(1,250);
+    seriesListView->setColumnWidth(1,200);
     seriesListView->setSelectionMode(QTableView::SingleSelection);
     seriesListView->setSelectionBehavior(QTableView::SelectRows);
     
@@ -99,14 +102,16 @@ FittingWindow::FittingWindow(QWidget *parent,
     /// + L1 ParameterPane
     parameterTableView = new QTableView(this);
     mainLayout->addWidget(parameterTableView, 1,0,1,1);
+    parameterTableView->setMinimumWidth(DEFAULT_LEFT_WIDTH);
+    
     parameterTableModel= new ParameterTableModel(&circuitModel, this);
     parameterTableView->setModel(parameterTableModel);
     parameterTableView->setColumnWidth(0,25);
     parameterTableView->setColumnWidth(1,40);
     parameterTableView->setColumnWidth(2,40);
-    parameterTableView->setColumnWidth(3,50);
-    parameterTableView->setColumnWidth(4,50);
-    parameterTableView->setColumnWidth(5,50);
+    parameterTableView->setColumnWidth(3,60);
+    parameterTableView->setColumnWidth(4,60);
+    parameterTableView->setColumnWidth(5,60);
     
     /// + L1 Fitting Graph
     FittingGraph = new PlotDualGraph(&fittedData, 
@@ -173,6 +178,42 @@ void FittingWindow::expSeriesAvailable(bool Enabled)
     selectFitButton->setEnabled(Enabled);
 }
 
+bool FittingWindow::simulate(impedance& result, const impedance *freqSource=NULL)
+{
+    bool normal = 1;
+    result.resize(freqSource==NULL ? defaultFreq.size() : freqSource->size());
+    for (int i=0; i<result.size(); i++){
+        double freq = freqSource==NULL ? defaultFreq.at(i) 
+                                       : freqSource->get(i,impedance::Fr);
+        result.setF(i,freq);
+        std::complex<double> Z = circuitModel.evaluate(freq);
+        if (! (std::isfinite(Z.real())) || ! (std::isfinite(Z.imag()))){
+            normal = 0;
+            result.setR(i, 0);
+            result.setI(i, 0);
+        }
+        else {
+            result.setR(i, Z.real());
+            result.setI(i, Z.imag());
+        }
+    }
+    normal &= result.validate();
+    if 
+}
+
+bool FittingWindow::setDefaultFreq(double maxF, double minF, int ptPerDec)
+{
+    if (minF>=maxF) return 0;
+    if (minF<0) return 0;
+    
+    defaultFreq.clear();
+    double factor = pow(10, 1.0/ptPerDec);
+    for (double freq=maxF; freq>minF*(1-1e-10); freq/=factor){
+        defaultFreq.push_back(freq);
+    }
+    return 1;
+}
+
 void FittingWindow::fittingDataSelected(QModelIndex index)
 {
     int row = index.row();
@@ -200,5 +241,20 @@ void FittingWindow::circuitExpressionAccepted()
     circuitDiagram->updateDiagram();
     circuitDiagram->update();
     parameterTableModel->refresh();
+}
+
+void FittingWindow::startSimFitButtonPushed()
+{
+    if (fittingModeButtons->checkedId() == 0) {// under fitting mode
+        
+    }
+    else { // under simulation mode
+        bool simSuccess = simulate(temporarySimData,NULL);
+        if (!simSuccess) {
+            QMessageBox::warning(this, tr("Error"), tr("Math error\nCheck element parameters"));
+            return;
+        }
+        
+    }
 }
 

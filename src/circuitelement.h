@@ -53,9 +53,7 @@ public:
     void setID (QString id) {ID = id;}
     QString id () const {return ID;}
     
-    QString fullName(QString sep=".") const {
-        return Symbol+sep+ID;
-    }
+    QString fullName(QString sep=".") const {return Symbol+sep+ID;}
     
     int varCount () const {return VarVal.size();}
     
@@ -83,7 +81,7 @@ public:
     QString toRPN() const;
     
     enum MathError{NoError, DivByZero, PowerZeroToZero, LogZero};
-    std::complex <double> evaluate(double freq, MathError *err=NULL);
+    std::complex <double> evaluate(double freq);
     
     //static const char* const stdFun [12]; // standard functions
     

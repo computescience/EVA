@@ -196,10 +196,8 @@ QString CircuitElement::toRPN() const
     return Output;
 }
 
-std::complex<double> CircuitElement::evaluate(double freq, MathError *err)
-{
-    if (err!=NULL) *err = NoError;
-    
+std::complex<double> CircuitElement::evaluate(double freq)
+{    
     QVector <complex> output;
     
     for (int iToken=0; iToken<formula.size(); iToken++){        
@@ -232,30 +230,20 @@ std::complex<double> CircuitElement::evaluate(double freq, MathError *err)
                 output[output.size()-2] *= output[output.size()-1];
                 break;
             case token::OpDiv:
-                if (output[output.size()-1] == complex(0,0)) {
-                    if (err!=NULL) *err = DivByZero; 
-                    return 0;
-                }
-                else {
-                    output[output.size()-2] *= output[output.size()-1];
-                }
+                output[output.size()-2] *= output[output.size()-1];
                 break;
             case token::OpPow:
-                if (output[output.size()-1] == complex(0,0)&&
-                        output[output.size()-2] == complex(0,0)){
-                    if (err!=NULL) *err = PowerZeroToZero;
-                }
-                else{
-                    output[output.size()-2] = pow(
-                            output[output.size()-2],
-                            output[output.size()-1]);
-                }
+                output[output.size()-2] = pow(
+                        output[output.size()-2],
+                        output[output.size()-1]);
+
                 break;
             } // End of switch(Token.o)
             output.pop_back();
             break;
         }// End of switch(Token.Type)
     }
+    return output.front();
 }
 
 /// Definition for extended standard functions

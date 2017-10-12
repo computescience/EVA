@@ -38,6 +38,8 @@ private:
     DataSeriesTable* seriesTable;
     CircuitModel circuitModel;
     ParameterTableModel* parameterTableModel;
+    
+    QVector <double> defaultFreq;
 
     /// Window component    
     QButtonGroup*  fittingModeButtons; 
@@ -49,17 +51,20 @@ private:
     CircuitDiagram* circuitDiagram;
     PlotDualGraph* FittingGraph;
 
-    /// Circuit Elements
-    /*
-    QVector <CircuitElement> BasicElems;
-    QVector <CircuitElement> CustomElems;*/
-    
     const int DEFAULT_DUAL_GRAPH_SIZE = 420;
+    const int DEFAULT_LEFT_WIDTH = 320;
+    
+    
+    /// Sim and fit
+    bool simulate(impedance &result, const impedance *freqSource);
+    bool setDefaultFreq(double maxF, double minF, int ptPerDec);
+    impedance temporarySimData;
     
 private slots:
     void dataSelectionChanged(const QVector<impedance *>& newData);
     void fittingDataSelected(QModelIndex index);
     void circuitExpressionAccepted();
+    void startSimFitButtonPushed();
 };
 
 #endif // FITTINGWINDOW_H

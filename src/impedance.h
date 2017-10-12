@@ -14,7 +14,7 @@ class impedance
 {
 public:
 
-    //impedance(int dataSize); //Create an uninitialized array
+    impedance(int dataSize = 0); //Create an uninitialized array
     impedance (const std::vector<double>& Freq,
                const std::vector<double>& Zr,
                const std::vector<double>& Zi);
@@ -73,12 +73,12 @@ public:
         return 0;
     }
     
-    
     /// Methods
     void resize(int size);
     inline int size() const {return size_;}
     void rename(QString newName) {name_ = newName;}
     QString dataName () const {return name_;}
+    bool validate() {return bool(validate_());} // Temporary wrapper
     
     inline void setF(int i, double freq) {if (i<size_) data_[Fr   ][0][i] = freq;}
     inline void setR(int i, double Zre ) {if (i<size_) data_[Zreal][0][i] = Zre;}

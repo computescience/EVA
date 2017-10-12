@@ -1,7 +1,9 @@
 #include "circuitmodel.h"
-#include <QDir>
+#include <cmath>
 
+#include <QDir>
 #include <QMessageBox>
+
 typedef std::complex <double> complex;
 
 QString popOperator(QVector<QString>& operStack,
@@ -532,10 +534,41 @@ QVector<QVector<CircuitModel::DiagramBlock> > CircuitModel::generateDiagramChunk
 
 std::complex<double> CircuitModel::evaluateNode(double freq, CircuitModel::CircuitNode *node)
 {
+    /// Exception handling rule from branches:
+    /// Zero: return 0 for parallel
+    /// Inf : return Inf for serial. Doesn't affect other branches in parallel
+    /// NaN : return NaN
+    
     if (node->Type == CircuitNode::Element){
-        
+        return node->elem.evaluate(freq);
     }
-    else if (node->Type == )
+    else if (node->Type == CircuitNode::SerialJoint){
+        complex sum (0, 0);
+        for (int i=0; i<node->child.size(); i++){
+            sum += node->child.at(i)->elem.evaluate(freq);
+            if (!std::isfinite(sum.real()) || !std::isfinite(sum.imag())){
+                // Propagate any infinite or NaN
+                return sum;
+            }
+        }
+        return sum;
+    }
+    else { // node->Type == CircuitNode::ParallelJoint
+        complex sum(0, 0);
+        for (int i=0; i<node->child.size(); i++){
+            complex branch = node->child.at(i)->elem.evaluate(freq);
+            if (branch == complex(0,0) ||  // Short circuit, return complex(0,0)
+                    std::isnan(branch.real()) || std::isnan(branch.imag())) // Nan, return Nan    
+                return branch;
+            
+            if (std::isinf(branch.real()) || std::isinf(branch.imag())) 
+                // Open circuit, doesn't affect the rest of the branches
+                continue;
+            sum += 1/branch;
+        }
+        return 1/sum;
+    }
+    return complex(0,0);
 }
 
 QVector <QString> CircuitModel::ElementLibrary = QVector<QString>();

@@ -1,6 +1,14 @@
 #include "impedance.h"
 #include <cmath>
 
+impedance::impedance(int dataSize):
+    data_(  NOF_TYPE, QVector<QVector<double> > (
+            NOF_MOD, QVector<double> (dataSize, 0))),
+    extremes_(NOF_TYPE, QVector<double> (NOF_EXTREME,0))
+{
+    size = dataSize;
+}
+
 impedance::impedance(const std::vector<double> &Freq,
                      const std::vector<double> &Zr,
                      const std::vector<double> &Zi):
@@ -36,7 +44,6 @@ void impedance::resize(int size) {
             data_[iType][iMod].resize(size);
         }
     }
-    validate_();
 }
 
 int impedance::validate_(){
