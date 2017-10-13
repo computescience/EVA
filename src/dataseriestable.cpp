@@ -6,7 +6,6 @@ DataSeriesTable::DataSeriesTable(QObject* parent):
     QAbstractTableModel(parent)
   
 {
-    nofExpSeries = 0;
 }
 
 QVariant DataSeriesTable::data(const QModelIndex &index, int role) const
@@ -16,37 +15,36 @@ QVariant DataSeriesTable::data(const QModelIndex &index, int role) const
     switch (role) {
     
     case Qt::DecorationRole:
-        if (index.row()==expSeries.size()) return QVariant();
-        if (index.column()==0){
-            impedance* dataSet = (expSeries.at(row)==NULL) ? 
-                                  simSeries.at(row):expSeries.at(row);
+        if (index.column()==0 && index.row()!=simSeries.size()){
+            // The total rows is simSeries.size()+1
+            impedance* dataSet = (row < nofExp() ? 
+                                  expSeries.at(row):simSeries.at(row);
             return dataSet->color();
         } 
         break;
         
     case Qt::CheckStateRole:
-        if (index.row()==expSeries.size()) return QVariant();
-        if (index.column() == 2){
-            if (row<expSeries.size())
+        if (row == nofTotal()) return QVariant();
+        if (index.column() == 2 && row<nofExp()){
             return expSeries.at(row)->isVisible() ? Qt::Checked : Qt::Unchecked;
         }
-        else if (index.column() == 3 && simSeries.at(row)!=NULL){
+        if (index.column() == 3 && simSeries.at(row)!=NULL){
             return simSeries.at(row)->isVisible() ? Qt::Checked : Qt::Unchecked;
         }
         break;
         
     case Qt::DisplayRole:
         if (index.column()== 1){
-            if (index.row() == expSeries.size()) return QString("<new>");
-            return ((row < nofExpSeries) ? expSeries.at(row):simSeries.at(row)) -> dataName();
+            if (row == nofTotal()) return QString("<new>");
+            return ((row < nofExp()) ? expSeries.at(row):simSeries.at(row)) -> dataName();
         }
         break;
     case Qt::FontRole:
-        if (index.row()==expSeries.size()) return QVariant();
+        if (index.row()==nofTotal()) return QVariant();
         if (index.column()==1){
             QFont font (QString("calibri"),8);
-            if (row>=nofExpSeries) font.setItalic(1);
-            else if (simSeries.at(row) != NULL) font.setBold(1);
+            if (row>=nofExp()) font.setItalic(1); // Simulated data serieses
+            else if (simSeries.at(row) != NULL) font.setBold(1); // Exp with Sim attached
         }
     }
     return QVariant();
@@ -85,8 +83,8 @@ void DataSeriesTable::addDataSeries(impedance *newDataSeries)
     /// Put the new data series into buffer;
     pendingData = newDataSeries;
     // If the new series is exp, then insert at the end of exp list, otherwise append to the end;
-    int insertAtRow = pendingData->isExp() ? nofExpSeries : expSeries.size();
-    if (insertRows(insertAtRow, 1)) nofExpSeries++;    
+    int insertAtRow = pendingData->isExp() ? nofExp() : nofTotal();
+    insertRows(insertAtRow, 1);   
 }
 
 void DataSeriesTable::removeDataSeries(impedance *whichDataSeries)

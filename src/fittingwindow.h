@@ -58,7 +58,7 @@ private:
     /// Sim and fit
     bool simulate(impedance &result, const impedance *freqSource);
     bool setDefaultFreq(double maxF, double minF, int ptPerDec);
-    impedance temporarySimData;
+    
     
 private slots:
     void dataSelectionChanged(const QVector<impedance *>& newData);

@@ -99,6 +99,11 @@ public:
     inline void setVisible(bool Visible) {visible_=Visible;}
     
     void setColor (const QColor& color) {color_ = color;}
+    void setAutoColor(){
+        color_ = QColor::fromHslQColor::fromHsv(
+                    ((colorSequenceNumber++)*HUE_PROGRESSION)%256,
+                    255,255);
+    }
     const QColor& color() const {return color_;}
     
     /// Dealing with the column title
@@ -106,6 +111,7 @@ public:
     /// Initialization is called in MainWindow
     static QString columnTitle (Column Col) {return col_title[Col];}
     static void initializeColumnTitle ();
+    static void initializeColorPalette() {colorSequenceNumber=0;}
     
 private:
     int size_;
@@ -124,6 +130,9 @@ private:
     //"zero" means this column contains 0
 
     static QVector <QString> col_title;
+    
+    const static int HUE_PROGRESSION = 63;
+    static int colorSequenceNumber;
     
     /** Properties **/
     bool isExp_;   // Wheter the data come from experimental (as opposed to fitted/simulated)

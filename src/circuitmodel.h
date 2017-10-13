@@ -9,6 +9,7 @@ class CircuitModel
 {
 public:
     CircuitModel();
+    ~CircuitModel(){delete rootNode;}
         
     struct CircuitNode{
         

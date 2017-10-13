@@ -25,8 +25,9 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), dataList()      
 {
     
-    /// Initialize the impedance column titles
+    /// Initialize the impedance class
     impedance::initializeColumnTitle();
+    impedance::initializeColorPalette();
     
     dataFilePath = "%USER%/Documents";
     
@@ -242,7 +243,7 @@ void MainWindow::importData(){
     }    
     
     impedance newData (importData.d(0),importData.d(1), importData.d(2));
-    newData.setColor(QColor::fromHsv(((colorSequenceNumber++)*HUE_PROGRESSION)%256,255,255));
+    newData.setAutoColor();
     newData.rename(dataName);
     
     dataList.push_back(newData);

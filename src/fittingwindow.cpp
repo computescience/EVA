@@ -245,15 +245,23 @@ void FittingWindow::circuitExpressionAccepted()
 
 void FittingWindow::startSimFitButtonPushed()
 {
+    int currentSelection = seriesListView->selectedIndexes().front().row();
     if (fittingModeButtons->checkedId() == 0) {// under fitting mode
         
     }
     else { // under simulation mode
+        impedance temporarySimData;
         bool simSuccess = simulate(temporarySimData,NULL);
         if (!simSuccess) {
-            QMessageBox::warning(this, tr("Error"), tr("Math error\nCheck element parameters"));
+            QMessageBox::warning(this, tr("Math error"), tr("Check parameters"));
             return;
         }
+        if (currentSelection==seriesTable->nofTotal()){
+            temporarySimData.setAutoColor();
+        }
+        else temporarySimData.setColor(
+                    seriesTable->getSim(currentSelection)->color());
+        *(seriesTable->getSim(currentSelection)) = temporarySimData;
         
     }
 }

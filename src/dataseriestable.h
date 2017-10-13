@@ -21,30 +21,32 @@ class DataSeriesTable : public QAbstractTableModel
     
 public:
     explicit DataSeriesTable(QObject *parent);
-    int rowCount(const QModelIndex &) const override {return expSeries.size() + 1;}
+    int rowCount(const QModelIndex &) const override {return simSeries.size() + 1;}
     int columnCount(const QModelIndex &) const override {return 4;}
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-    int nofExp () const {return nofExpSeries;}
-    int nofTotal () const {return expSeries.size();}
+    int nofExp () const {return expSeries.size();}
+    int nofTotal () const {return simSeries.size();}
     impedance* getExp(int row) const {return expSeries.at(row);}
     impedance* getSim(int row) const {return simSeries.at(row);}
-    //void setAddNewLine (bool add=1){addNewLine = add;}
     
 public slots:
     void addDataSeries(impedance* newDataSeries);
     void removeDataSeries(impedance* whichDataSeries);
     void attachFittedData(impedance* expData, impedance* fittedData);
-    
+    void rowEntryModified(int row) {emit dataChanged(index(row,0),index(row,3));}
     
 private:
     impedance* pendingData; // The data series to be added
     
-    // individually maintain a table of pointers to series
+    // Individually maintain two lists of pointers to series
+    // simSeries contains fitted data which is positioned in
+    // alignment with the corresponding exp data series in
+    // expSeries. Positions where there is no corresponding
+    // fitted data will contain a NULL pointer
     QList <impedance*> expSeries;
     QList <impedance*> simSeries; 
-    int nofExpSeries; // Keeping a record of number of exp rows
 };
 
 #endif // DATASERIESTABLE_H

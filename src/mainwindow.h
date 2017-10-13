@@ -80,8 +80,6 @@ private:
     const int PLOT_HEIGHT = 500;
     const int BODE_WIDTH = 400;
     
-    static const int HUE_PROGRESSION = 63;
-    
     QString dataFilePath;
     FittingWindow* fittingWindow;
 

@@ -46,6 +46,12 @@ void impedance::resize(int size) {
     }
 }
 
+void impedance::setAutoColor(){
+    color_ = QColor::fromHslQColor::fromHsv(
+                ((colorSequenceNumber++)*HUE_PROGRESSION)%256,
+                255,255);
+}
+
 int impedance::validate_(){
     if (!size_) return 0;
     
