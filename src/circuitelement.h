@@ -78,7 +78,7 @@ public:
         return ImportSuccess ? QString() :importErrorMsg;
     }
     
-    QString toRPN() const;
+    //QString toRPN() const; // not useful
     
     enum MathError{NoError, DivByZero, PowerZeroToZero, LogZero};
     std::complex <double> evaluate(double freq);
@@ -115,10 +115,13 @@ private:
     /// For importing from XML
     QString importErrorMsg;
     bool ImportSuccess;
+    QVector <token> parseInput  (QString input);
+    QVector <token> shuntingYard(QVector<token> input);
     
     /// Library for standard functions and their math names
     struct stdFunc{
-        stdFunc(QString n, std::complex<double> (*f)(std::complex<double>),\)
+        stdFunc(): func(NULL), name(){}
+        stdFunc(QString n, std::complex<double> (*f)(std::complex<double>))
             : func(f), name(n){}
         std::complex<double> (*func)(std::complex<double>); // Func pointer
         QString name;
@@ -131,7 +134,7 @@ private:
         return -1;
     }
     static std::complex<double> calculate(int funNum, std::complex<double> z){
-        return stdFunLib.at(funNum) (z);
+        return stdFunLib.at(funNum).func (z);
     }
 };
 

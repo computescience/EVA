@@ -19,7 +19,9 @@ class FittingWindow : public QDialog
 {
     Q_OBJECT
 public:
-    FittingWindow(QWidget* parent, DataSeriesTable* SeriesTable);
+    FittingWindow(QWidget* parent, 
+                  DataSeriesTable* SeriesTable, 
+                  QList<impedance>* dataList);
     
 public slots:
     
@@ -29,7 +31,8 @@ public slots:
 
 private:
     /// Data
-
+    QList <impedance>* DataList; // Original list of all the data
+    
     // The fitted data is a copy of an imp series from the 
     // main data source. It needs to be re-copied every time
     // the fitting window opens.
@@ -53,7 +56,6 @@ private:
 
     const int DEFAULT_DUAL_GRAPH_SIZE = 420;
     const int DEFAULT_LEFT_WIDTH = 320;
-    
     
     /// Sim and fit
     bool simulate(impedance &result, const impedance *freqSource);

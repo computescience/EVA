@@ -18,7 +18,7 @@ QVariant DataSeriesTable::data(const QModelIndex &index, int role) const
         if (index.column()==0 && index.row()!=simSeries.size()){
             // The total rows is simSeries.size()+1
             impedance* dataSet = (row < nofExp() ? 
-                                  expSeries.at(row):simSeries.at(row);
+                                  expSeries.at(row):simSeries.at(row));
             return dataSet->color();
         } 
         break;

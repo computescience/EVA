@@ -4,10 +4,7 @@
 
 typedef std::complex<double> complex;
 
-QVector <token> parseInput  (QString input);
-QVector <token> shuntingYard(QVector<token> input);
-
-inline QVector<token> parse (QString input) {return shuntingYard(parseInput(input));}
+//inline QVector<token> parse (QString input) {return shuntingYard(parseInput(input));}
 
 
 inline std::complex<double> myTanh(std::complex<double> x){
@@ -125,7 +122,7 @@ CircuitElement::CircuitElement(QFile *fromXML):
         Doi = elemSource.firstChildElement("doi").text();
     }
     
-    formula = parse(elemExprText);
+    formula = shuntingYard(parseInput(elemExprText));
     if (!formula.isEmpty() && formula[0].s.startsWith("Error")) {
         importErrorMsg=formula[0].s;
         return;
@@ -159,43 +156,6 @@ CircuitElement::CircuitElement(QFile *fromXML):
     ImportSuccess = 1;
 }
 
-QString CircuitElement::toRPN() const
-{
-    QString Output;
-    for (int i =0; i<formula.size(); i++){
-        const token &t = formula.at(i);
-        QString tks; // Token string
-        switch (t.Type){
-        case token::Null:
-            return t.s; break;
-        case token::Numeric:
-            tks = QString::number(t.v); break;
-        case token::Complex:
-            tks = QString("(%1+%2i)").arg(t.z.real()).arg(t.z.imag()); break;
-        case token::Variable:
-            tks = t.s; break;
-        case token::Function:
-            tks = QString("[") + token::stdFun[t.f]+ "]"; break;
-        case token::Operator:
-        {
-            switch (t.o){
-            case token::OpAdd: tks = "+"; break;
-            case token::OpMin: tks = "-"; break;
-            case token::OpMul: tks = "*"; break;
-            case token::OpDiv: tks = "/"; break;
-            case token::OpPow: tks = "^"; break;
-            default: break;
-            }
-        }
-            break;        
-        }
-        Output.append(tks);
-        Output.append(" ");
-    }
-    
-    return Output;
-}
-
 std::complex<double> CircuitElement::evaluate(double freq)
 {    
     QVector <complex> output;
@@ -205,8 +165,8 @@ std::complex<double> CircuitElement::evaluate(double freq)
         
         switch (Token.Type){
         default: break;
-        case token::Numeric: output.push_back(Token.z); break;
-        case token::Complex: output.push_back(Token.v); break;
+        case token::Numeric: output.push_back(Token.v); break;
+        case token::Complex: output.push_back(Token.z); break;
             
         case token::Variable:
             if (Token.s==QString("f")) output.push_back(freq);
@@ -215,11 +175,12 @@ std::complex<double> CircuitElement::evaluate(double freq)
             break;
             
         case token::Function:
-            output.back = calculate(Token.f, output.back());
+            output.back() = calculate(Token.f, output.back());
             break;
             
         case token::Operator:
             switch(Token.o){
+            default: break;
             case token::OpAdd:
                 output[output.size()-2] += output[output.size()-1];
                 break;
@@ -230,7 +191,7 @@ std::complex<double> CircuitElement::evaluate(double freq)
                 output[output.size()-2] *= output[output.size()-1];
                 break;
             case token::OpDiv:
-                output[output.size()-2] *= output[output.size()-1];
+                output[output.size()-2] /= output[output.size()-1];
                 break;
             case token::OpPow:
                 output[output.size()-2] = pow(
@@ -246,28 +207,40 @@ std::complex<double> CircuitElement::evaluate(double freq)
     return output.front();
 }
 
-/// Definition for extended standard functions
-complex cot  (complex z) {return 1/tan (z);}
-complex coth (complex z) {return 1/tanh(z);}
+/// Wrappers / overloads for standard functions
+
+complex sin  (complex z) {return std::sin(z);}
+complex cos  (complex z) {return std::cos(z);}
+complex tan  (complex z) {return std::tan(z);}
+complex cot  (complex z) {return 1.0/tan (z);}
+complex sinh (complex z) {return std::sinh(z);}
+complex cosh (complex z) {return std::cosh(z);}
+complex tanh (complex z) {return std::tanh(z);}
+complex coth (complex z) {return 1.0/tanh(z);}
+complex abs  (complex z) {return std::abs(z);}
+complex sqrt (complex z) {return std::sqrt(z);}
+complex ln   (complex z) {return std::log(z);}
+complex log  (complex z) {return std::log10(z);}
+complex exp  (complex z) {return std::exp(z);}
 
 void CircuitElement::initializeStdFunLib()
 {
-    stdFunLib.push_back(stdFunc("sin",  std::sin));
-    stdFunLib.push_back(stdFunc("cos",  std::cos));
-    stdFunLib.push_back(stdFunc("tan",  std::tan));
+    stdFunLib.push_back(stdFunc("sin",  sin));
+    stdFunLib.push_back(stdFunc("cos",  cos));
+    stdFunLib.push_back(stdFunc("tan",  tan));
     stdFunLib.push_back(stdFunc("cot",  cot));
-    stdFunLib.push_back(stdFunc("sinh", std::sinh));
-    stdFunLib.push_back(stdFunc("cosh", std::cosh));
-    stdFunLib.push_back(stdFunc("tanh", std::tanh));
+    stdFunLib.push_back(stdFunc("sinh", sinh));
+    stdFunLib.push_back(stdFunc("cosh", cosh));
+    stdFunLib.push_back(stdFunc("tanh", tanh));
     stdFunLib.push_back(stdFunc("coth", coth));
-    stdFunLib.push_back(stdFunc("abs",  std::abs));
-    stdFunLib.push_back(stdFunc("sqrt", std::sqrt));
-    stdFunLib.push_back(stdFunc("ln",   std::log));
-    stdFunLib.push_back(stdFunc("log",  std::log10));
-    stdFunLib.push_back(stdFunc("exp",  std::exp));    
+    stdFunLib.push_back(stdFunc("abs",  abs));
+    stdFunLib.push_back(stdFunc("sqrt", sqrt));
+    stdFunLib.push_back(stdFunc("ln",   ln));
+    stdFunLib.push_back(stdFunc("log",  log));
+    stdFunLib.push_back(stdFunc("exp",  exp));    
 }
 
-QVector<token> parseInput(QString input){
+QVector<token> CircuitElement::parseInput(QString input){
 
     QVector <token> sortedInput;
 	
@@ -360,8 +333,8 @@ QVector<token> parseInput(QString input){
 				Symbol.push_back (input [pos]);
 				pos++;
 			}
-            if (token::isStdFunc(Symbol)!=-1){
-                sortedInput.push_back(token (token::isStdFunc(Symbol)));
+            if (isStdFunc(Symbol)!=-1){
+                sortedInput.push_back(token (isStdFunc(Symbol)));
             }
 			else sortedInput.push_back(token (Symbol));
 		}
@@ -382,7 +355,7 @@ QVector<token> parseInput(QString input){
 	return (sortedInput);
 }
 
-QVector <token> shuntingYard(QVector<token> input){
+QVector <token> CircuitElement::shuntingYard(QVector<token> input){
 	if (input.size()&& input[0].s.startsWith(QString("Error"))) return input;
 	
 	QVector<token> operatorStack;
@@ -456,6 +429,7 @@ QVector <token> shuntingYard(QVector<token> input){
     return output;
 
 }
+QVector <CircuitElement::stdFunc> CircuitElement::stdFunLib(0);
 
 /*
 const char* const token::stdFun [] = {

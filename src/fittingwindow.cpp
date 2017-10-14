@@ -15,11 +15,14 @@
 
 
 FittingWindow::FittingWindow(QWidget *parent,
-                             DataSeriesTable *SeriesTable):
+                             DataSeriesTable *SeriesTable,
+                             QList<impedance>* dataList):
     QDialog (parent,Qt::Dialog),
-    seriesTable (SeriesTable)
-    
+    DataList(dataList),
+    seriesTable (SeriesTable),
+    circuitModel()    
 {
+    setDefaultFreq(1e6, 1e-3, 10);
     QGridLayout* mainLayout = new QGridLayout;
     /** Contents
         Fitting option pane (TL)
@@ -49,10 +52,11 @@ FittingWindow::FittingWindow(QWidget *parent,
     /// + L1 Fitting options pane
     QGroupBox* fittingModeGroupBox = new QGroupBox(this);
     seriesListView = new QTableView (this);
+    QPushButton* startSimFitButton = new QPushButton(tr("Start"));
     
     fittingOptionsLayout -> addWidget(fittingModeGroupBox,0,0,1,1);
-    fittingOptionsLayout -> addWidget(seriesListView,     0,1,1,1);
-    QPushButton* startSimFitButton = new QPushButton(tr("Start"));
+    fittingOptionsLayout -> addWidget(seriesListView,     1,0,1,1);
+    fittingOptionsLayout -> addWidget(startSimFitButton,  0,1,1,1);
     connect(startSimFitButton, SIGNAL(clicked()), 
             this, SLOT(startSimFitButtonPushed()));
     
@@ -97,8 +101,11 @@ FittingWindow::FittingWindow(QWidget *parent,
     circuitExpressionEditLayout-> addWidget(circuitExpressionEdit);
     QPushButton* circuitExpressionConfirm = new QPushButton ("Accept", this);
     circuitExpressionEditLayout->addWidget(circuitExpressionConfirm);
-    connect (circuitExpressionConfirm,SIGNAL(clicked(bool)), this,SLOT(circuitExpressionAccepted()));
     
+    connect (circuitExpressionConfirm,SIGNAL(clicked(bool)), 
+             this,SLOT(circuitExpressionAccepted()));
+    connect (circuitExpressionEdit, SIGNAL(returnPressed()), 
+             this,SLOT(circuitExpressionAccepted()));
     /// + L1 ParameterPane
     parameterTableView = new QTableView(this);
     mainLayout->addWidget(parameterTableView, 1,0,1,1);
@@ -137,7 +144,7 @@ void FittingWindow::dataSelectionChanged(const QVector<impedance*>& newData)
     for (int i=0;i<newData.size(); i++){
         if (newData[i]!=NULL) fittedData.push_back(*(newData.at(i)));
     }
-    FittingGraph->Refresh();
+    FittingGraph->update();
 }
 
 void FittingWindow::dataSourceChanged()
@@ -198,7 +205,7 @@ bool FittingWindow::simulate(impedance& result, const impedance *freqSource=NULL
         }
     }
     normal &= result.validate();
-    if 
+    return normal;
 }
 
 bool FittingWindow::setDefaultFreq(double maxF, double minF, int ptPerDec)
@@ -232,8 +239,10 @@ void FittingWindow::fittingDataSelected(QModelIndex index)
 
 void FittingWindow::circuitExpressionAccepted()
 {
-    QString errorMsg = 
-            circuitModel.parseExpression(circuitExpressionEdit->text());
+    QString errorMsg = circuitModel.parseExpression(
+                //circuitExpressionEdit->text()
+                "R.s + R.ct * C.dl"
+                );
     if (errorMsg.size()){
         QMessageBox::warning(this,tr("Error"),errorMsg);
     }
@@ -245,24 +254,36 @@ void FittingWindow::circuitExpressionAccepted()
 
 void FittingWindow::startSimFitButtonPushed()
 {
-    int currentSelection = seriesListView->selectedIndexes().front().row();
+    if (circuitModel.isEmpty()){
+        QMessageBox::warning(this, tr("Error"), tr("Circuit is empty"));
+        return;
+    }
+    
+    int currentSelection = seriesListView->currentIndex().row();
     if (fittingModeButtons->checkedId() == 0) {// under fitting mode
         
     }
     else { // under simulation mode
-        impedance temporarySimData;
-        bool simSuccess = simulate(temporarySimData,NULL);
+        impedance newSimData;
+        bool simSuccess = simulate(newSimData,NULL);
         if (!simSuccess) {
             QMessageBox::warning(this, tr("Math error"), tr("Check parameters"));
             return;
         }
-        if (currentSelection==seriesTable->nofTotal()){
-            temporarySimData.setAutoColor();
+        
+        if (currentSelection==seriesTable->nofTotal()){ // Selected "new"
+            newSimData.setAutoColor();
+            DataList->push_back(newSimData);
+            seriesTable->addDataSeries(&(DataList->back()));
+            fittingDataSelected(seriesTable->index(seriesTable->nofTotal(),0));
         }
-        else temporarySimData.setColor(
-                    seriesTable->getSim(currentSelection)->color());
-        *(seriesTable->getSim(currentSelection)) = temporarySimData;
+        else { // Selected existing simulated data series
+            newSimData.setColor(seriesTable->getSim(currentSelection)->color());
+            *(seriesTable->getSim(currentSelection)) = newSimData;
+            fittingDataSelected(seriesListView->currentIndex());
+        }
         
     }
+    
 }
 

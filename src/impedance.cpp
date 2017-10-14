@@ -1,12 +1,14 @@
 #include "impedance.h"
 #include <cmath>
 
+int impedance::colorSequenceNumber(0);
+
 impedance::impedance(int dataSize):
     data_(  NOF_TYPE, QVector<QVector<double> > (
             NOF_MOD, QVector<double> (dataSize, 0))),
     extremes_(NOF_TYPE, QVector<double> (NOF_EXTREME,0))
 {
-    size = dataSize;
+    size_ = dataSize;
 }
 
 impedance::impedance(const std::vector<double> &Freq,
@@ -44,12 +46,6 @@ void impedance::resize(int size) {
             data_[iType][iMod].resize(size);
         }
     }
-}
-
-void impedance::setAutoColor(){
-    color_ = QColor::fromHslQColor::fromHsv(
-                ((colorSequenceNumber++)*HUE_PROGRESSION)%256,
-                255,255);
 }
 
 int impedance::validate_(){

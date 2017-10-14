@@ -545,7 +545,7 @@ std::complex<double> CircuitModel::evaluateNode(double freq, CircuitModel::Circu
     else if (node->Type == CircuitNode::SerialJoint){
         complex sum (0, 0);
         for (int i=0; i<node->child.size(); i++){
-            sum += node->child.at(i)->elem.evaluate(freq);
+            sum += evaluateNode(freq, node->child.at(i));
             if (!std::isfinite(sum.real()) || !std::isfinite(sum.imag())){
                 // Propagate any infinite or NaN
                 return sum;
@@ -556,7 +556,7 @@ std::complex<double> CircuitModel::evaluateNode(double freq, CircuitModel::Circu
     else { // node->Type == CircuitNode::ParallelJoint
         complex sum(0, 0);
         for (int i=0; i<node->child.size(); i++){
-            complex branch = node->child.at(i)->elem.evaluate(freq);
+            complex branch = evaluateNode(freq,node->child.at(i));
             if (branch == complex(0,0) ||  // Short circuit, return complex(0,0)
                     std::isnan(branch.real()) || std::isnan(branch.imag())) // Nan, return Nan    
                 return branch;
@@ -564,9 +564,9 @@ std::complex<double> CircuitModel::evaluateNode(double freq, CircuitModel::Circu
             if (std::isinf(branch.real()) || std::isinf(branch.imag())) 
                 // Open circuit, doesn't affect the rest of the branches
                 continue;
-            sum += 1/branch;
+            sum += 1.0/branch;
         }
-        return 1/sum;
+        return 1.0/sum;
     }
     return complex(0,0);
 }

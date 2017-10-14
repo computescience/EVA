@@ -37,6 +37,7 @@ public:
     QString toMathExpression (const CircuitNode* atNode = NULL,
                               bool includeElementID = 1) const;
     
+    bool isEmpty() const {return rootNode==NULL;}
     int elemCount () const {return elementList.size();}
     
     // Read-only and non-read-only

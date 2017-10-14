@@ -182,7 +182,7 @@ MainWindow::MainWindow(QWidget *parent)
     setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
  
     /// Initialize fitting GUI
-    fittingWindow = new FittingWindow(this, dataTable);
+    fittingWindow = new FittingWindow(this, dataTable, &dataList);
     fittingWindow->setModal(1);
     
     statusBar()->showMessage(tr("Ready"),2000);

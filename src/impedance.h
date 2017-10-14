@@ -78,7 +78,9 @@ public:
     inline int size() const {return size_;}
     void rename(QString newName) {name_ = newName;}
     QString dataName () const {return name_;}
-    bool validate() {return bool(validate_());} // Temporary wrapper
+    bool validate() {return validate_() == 0;} // Temporary wrapper
+    /// Caution: validate_() returns 0 when successful
+    /// however, validate() returns 1 when successful
     
     inline void setF(int i, double freq) {if (i<size_) data_[Fr   ][0][i] = freq;}
     inline void setR(int i, double Zre ) {if (i<size_) data_[Zreal][0][i] = Zre;}
@@ -100,7 +102,7 @@ public:
     
     void setColor (const QColor& color) {color_ = color;}
     void setAutoColor(){
-        color_ = QColor::fromHslQColor::fromHsv(
+        color_ = QColor::fromHsv(
                     ((colorSequenceNumber++)*HUE_PROGRESSION)%256,
                     255,255);
     }
