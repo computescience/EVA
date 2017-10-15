@@ -78,10 +78,11 @@ bool DataSeriesTable::insertRows(int row, int count, const QModelIndex &parent)
     return 1;
 }
 
-void DataSeriesTable::addDataSeries(impedance *newDataSeries)
+void DataSeriesTable::addDataSeries(const impedance& newDataSeries)
 {
     /// Put the new data series into buffer;
-    pendingData = newDataSeries;
+    dataList.push_back(&newDataSeries);
+    pendingData = &(dataList.back());
     // If the new series is exp, then insert at the end of exp list, otherwise append to the end;
     int insertAtRow = pendingData->isExp() ? nofExp() : nofTotal();
     insertRows(insertAtRow, 1);   

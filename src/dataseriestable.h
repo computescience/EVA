@@ -32,7 +32,7 @@ public:
     impedance* getSim(int row) const {return simSeries.at(row);}
     
 public slots:
-    void addDataSeries(impedance* newDataSeries);
+    void addDataSeries(const impedance &newDataSeries);
     void removeDataSeries(impedance* whichDataSeries);
     void attachFittedData(impedance* expData, impedance* fittedData);
     void rowEntryModified(int row) {emit dataChanged(index(row,0),index(row,3));}
