@@ -27,18 +27,7 @@ private:
     
     /// Data
     // Actual data storage
-    QList<impedance> dataList;
     
-    /*
-    // Stores the mapping between exp and fit series;
-    // "expList" only contains a list of experimental data pointer
-    // "simList" contains: fitted data series in exact correspondence
-    // with those in expList. In case a series does not have fitted
-    // data, that position in simList contains a null pointer. At
-    // the end, the simList contains all simulated data series
-    QList<impedance*> expSeries_Base;
-    QList<impedance*> simSeries_Base;
-    */
 
     /// Backstage components
     DataSeriesTable* dataTable;

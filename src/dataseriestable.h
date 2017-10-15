@@ -38,6 +38,8 @@ public slots:
     void rowEntryModified(int row) {emit dataChanged(index(row,0),index(row,3));}
     
 private:
+    QList<impedance> dataList; // All the data series
+    
     impedance* pendingData; // The data series to be added
     
     // Individually maintain two lists of pointers to series
